@@ -10,10 +10,10 @@ l = 0.9721;
 % linear scaling factor based on ration between target circumference and 
 % standard circumference
 r = target_circumference / 56;
-
-circumference   = 56 * c * r * 1.09;
-NzCzIz          = 36.43 * i * r * 1.09;
-LPACzRPA        = 35.18 * l * r * 1.09;
+scaling = 1; % it was 1.09 but that was making cap of size 61cm.
+circumference   = 56 * c * r * scaling;
+NzCzIz          = 36.43 * i * r * scaling;
+LPACzRPA        = 35.18 * l * r * scaling;
 
 fprintf('Circumference: %.2f\n' ,circumference);
 fprintf('Nz-Cz-Iz: %.2f\n', NzCzIz);
