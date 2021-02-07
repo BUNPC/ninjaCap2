@@ -1,0 +1,248 @@
+function [rightSide_refPts_neighbours, leftSide_refPts_neighbours, top_refPts_neighbours] =  get_refpts_neighbours()
+
+% Below cell arrays contains refpt neighbours for each refpt inside the
+% corresponding side panel. Last eight elements in a row are neighbours to
+% first element in that row. First four are neighbours in front, back, top
+% and bottom respectively. Although this may not be exactly true for top
+% panel. Next four elements are neighbours in front-top, back-top,
+% front-bottom and back-bottom directions.
+
+rightSide_refPts_neighbours = {'AFp10','','AF10','AFp10h','','AF10h','','','';
+                     'AFp10h','','AF10h','AFp8','AFp10','','AF8','','AF10';
+                     'AFp8','','AF8','AF6h','AFp10h','','AF8h','','AF10h';
+                     'AF10','AFp10','AFF10','AF10h','','AFp10h','AFF10h','','';
+                     'AF10h','AFp10h','AFF10h','AF8','AF10','AFp8','AFF8','AFp10','AFF10';
+                     'AF8','AFp8','AFF8','AF8h','AF10h','','AFF8h','AFp10h','AFF10h';
+                     'AFF10','AF10','F10','AFF10h','','AF10h','F10h','','';
+                     'AFF10h','AF10h','F10h','AFF8','AFF10','AF8','F8','AF10','F10';
+                     'AFF8','AF8','F8','AFF8h','AFF10h','AF8h','F8h','AF10h','F10h';
+                     'F10','AFF10','FFT10','F10h','','AFF10h','FFT10h','','';
+                     'F10h','AFF10h','FFT10h','F8','F10','AFF8','FFT8','AFF10','FFT10';
+                     'F8','AFF8','FFT8','F8h','F10h','AFF8h','FFT8h','AFF10h','FFT10h';
+                     'FFT10','F10','FT10','FFT10h','','F10h','FT10h','','';
+                     'FFT10h','F10h','FT10h','FFT8','FFT10','F8','FT8','F10','FT10';
+                     'FFT8','F8','FT8','FFT8h','FFT10h','F8h','FT8h','F10h','FT10h';
+                     'FT10','FFT10','FTT10','FT10h','','FFT10h','FTT10h','','';
+                     'FT10h','FFT10h','FTT10h','FT8','FT10','FFT8','FTT8','FFT10','FTT10';
+                     'FT8','FFT8','FTT8','FT8h','FT10h','FFT8h','FTT8h','FFT10h','FTT10h';
+                     'FTT10','FT10','RPA','FTT10h','','FT10h','T10h','','';
+                     'FTT10h','FT10h','T10h','FTT8','FTT10','FT8','T8','FT10','RPA';
+                     'FTT8','FT8','T8','FTT8h','FTT10h','FT8h','T8h','FT10h','T10h';
+                     'RPA','FTT10','TTP10','T10h','','FTT10h','TTP10h','','';
+                     'T10h','FTT10h','TTP10h','T8','RPA','FTT8','TTP8','FTT10','TTP10';
+                     'T8','FTT8','TTP8','T8h','T10h','FTT8h','TTP8h','FTT10h','TTP10h';
+                     'TTP10','RPA','TP10','TTP10h','','T10h','TP10h','','';
+                     'TTP10h','T10h','TP10h','TTP8','TTP10','T8','TP8','RPA','TP10';
+                     'TTP8','T8','TP8','TTP8h','TTP10h','T8h','TP8h','T10h','TP10h';
+                     'TP10','TTP10','TPP10','TP10h','','TTP10h','TPP10h','','';
+                     'TP10h','TTP10h','TPP10h','TP8','TP10','TTP8','TPP8','TTP10','TPP10';
+                     'TP8','TTP8','TPP8','TP8h','TP10h','TTP8h','TPP8h','TTP10h','TPP10h';
+                     'TPP10','TP10','P10','TPP10h','','TP10h','P10h','','';
+                     'TPP10h','TP10h','P10h','TPP8','TPP10','TP8','P8','TP10','P10';
+                     'TPP8','TP8','P8','TPP8h','TPP10h','TP8h','P8h','TP10h','P10h';
+                     'P10','TPP10','PPO10','P10h','','TPP10h','PPO10h','','';
+                     'P10h','TPP10h','PPO10h','P8','P10','TPP8','PPO8','TPP10','PPO10';
+                     'P8','TPP8','PPO8','P8h','P10h','TPP8h','PPO8h','TPP10h','PPO10h';
+                     'PPO10','P10','PO10','PPO10h','','P10h','PO10h','','';
+                     'PPO10h','P10h','PO10h','PPO8','PPO10','P8','PO8','P10','PO10';
+                     'PPO8','P8','PO8','PPO8h','PPO10h','P8h','PO8h','P10h','PO10h';
+                     'PO10','PPO10','POO10','PO10h','','PPO10h','POO10h','','';
+                     'PO10h','PPO10h','POO10h','PO8','PO10','PPO8','POO8','PPO10','POO10';
+                     'PO8','PPO8','POO8','PO8h','PO10h','PPO8h','POO6','PPO10h','POO10h';
+                     'POO10','PO10','','POO10h','','PO10h','','','';
+                     'POO10h','PO10h','','POO8','POO10','PO8','','PO10','';
+                     'POO8','PO8','','POO6','POO10h','PO8h','','PO10h','';
+                     'AF8h','','AFF8h','AF6','AF8','','AFF6','AFp8','AFF8';
+                     'AF6','','AFF6','AF6h','AF8h','','AFF6h','','AFF8h';
+                     'AF6h','','AFF6h','','AF6','','AFF4','','AFF6';
+                     'AFF8h','AF8h','F8h','AFF6','AFF8','AF6','F6','AF8','F8';
+                     'AFF6','AF6','F6','AFF6h','AFF8h','AF6h','F6h','AF8h','F8h';
+                     'AFF6h','AF6h','F6h','AFF4','AFF6','','F4','AF6','F6';
+                     'F8h','AFF8h','FFT8h','F6','F8','AFF6','FFC6','AFF8','FFT8';
+                     'F6','AFF6','FFC6','F6h','F8h','AFF6h','FFC6h','AFF8h','FFT8h';
+                     'F6h','AFF6h','FFC6h','F4','F6','AFF4','FFC4','AFF6','FFC6';
+                     'FFT8h','F8h','FT8h','FFC6','FFT8','F6','FC6','F8','FT8';
+                     'FFC6','F6','FC6','FFC6h','FFT8h','F6h','FC6h','F8h','FT8h';
+                     'FFC6h','F6h','FC6h','FFC4','FFC6','F4','FC4','F6','FC6';
+                     'FT8h','FFT8h','FTT8h','FC6','FT8','FFC6','FCC6','FFT8','FTT8';
+                     'FC6','FFC6','FCC6','FC6h','FT8h','FFC6h','FCC6h','FFT8h','FTT8h';
+                     'FC6h','FFC6h','FCC6h','FC4','FC6','FFC4','FCC4','FFC6','FCC6';
+                     'FTT8h','FT8h','T8h','FCC6','FTT8','FC6','C6','FT8','T8';
+                     'FCC6','FC6','C6','FCC6h','FTT8h','FC6h','C6h','FT8h','T8h';
+                     'FCC6h','FC6h','C6h','FCC4','FCC6','FC4','C4','FC6','C6';
+                     'T8h','FTT8h','TTP8h','C6','T8','FCC6','CCP6','FTT8','TTP8';
+                     'C6','FCC6','CCP6','C6h','T8h','FCC6h','CCP6h','FTT8h','TTP8h';
+                     'C6h','FCC6h','CCP6h','C4','C6','FCC4','CCP4','FCC6','CCP6';
+                     'TTP8h','T8h','TP8h','CCP6','TTP8','C6','CP6','T8','TP8';
+                     'CCP6','C6','CP6','CCP6h','TTP8h','C6h','CP6h','T8h','TP8h';
+                     'CCP6h','C6h','CP6h','CCP4','CCP6','C4','CP4','C6','CP6';
+                     'TP8h','TTP8h','TPP8h','CP6','TP8','CCP6','CPP6','TTP8','TPP8';
+                     'CP6','CCP6','CPP6','CP6h','TP8h','CCP6h','CPP6h','TTP8h','TPP8h';
+                     'CP6h','CCP6h','CPP6h','CP4','CP6','CCP4','CPP4','CCP6','CPP6';
+                     'TPP8h','TP8h','P8h','CPP6','TPP8','CP6','P6','TP8','P8';
+                     'CPP6','CP6','P6','CPP6h','TPP8h','CP6h','P6h','TP8h','P8h';
+                     'CPP6h','CP6h','P6h','CPP4','CPP6','CP4','P4','CP6','P6';
+                     'P8h','TPP8h','PPO8h','P6','P8','CPP6','PPO6','TPP8','PPO8';
+                     'P6','CPP6','PPO6','P6h','P8h','CPP6h','PPO6h','TPP8h','PPO8h';
+                     'P6h','CPP6h','PPO6h','P4','P6','CPP4','PPO4','CPP6','PPO6';
+                     'PPO8h','P8h','PO8h','PPO6','PPO8','P6','PO6','P8','PO8';
+                     'PPO6','P6','PO6','PPO6h','PPO8h','P6h','PO6h','P8h','PO8h';
+                     'PPO6h','P6h','PO6h','PPO4','PPO6','P4','PO4','P6','PO6';
+                     'PO8h','PPO8h','POO6','PO6','PO8','PPO6','','PPO8','POO8';
+                     'PO6','PPO6','','PO6h','PO8h','PPO6h','','PPO8h','POO6';
+                     'PO6h','PPO6h','','PO4','PO6','PPO4','','PPO6','';
+                     'POO6','PO8h','','PO4','POO8','PO6','','PO8','';
+                     'AFF4','','F4','','AFF6h','','F4h','AF6h','F6h';
+                     'F4','F4h','F6h','AFF4','FFC4','','FFC4h','AFF6h','FFC6h';
+                     'F4h','','FFC4h','','F4','','','AFF4','FFC4';
+                     'FFC4','F4','FC4','FFC4h','FFC6h','F4h','FC4h','F6h','FC6h';
+                     'FFC4h','F4h','FC4h','','FFC4','','','F4','FC4';
+                     'FC4','FFC4','FCC4','FC4h','FC6h','FFC4h','FCC4h','FFC6h','FCC6h';
+                     'FC4h','FFC4h','FCC4h','','FC4','','FCC2','FFC4','FCC4';
+                     'FCC4','FC4','C4','FCC4h','FCC6h','FC4h','C4h','FC6h','C6h';
+                     'FCC4h','FC4h','C4h','FCC2','FCC4','','C2','FC4','C4';
+                     'FCC2','','C2','','FCC4h','','','FC4h','C4h';
+                     'C4','FCC4','CCP4','C4h','C6h','FCC4h','CCP4h','FCC6h','CCP6h';
+                     'C4h','FCC4h','CCP4h','C2','C4','FCC2','CCP2','FCC4','CCP4';
+                     'C2','FCC2','CCP2','','C4h','','','FCC4h','CCP4h';
+                     'CCP4','C4','CP4','CCP4h','CCP6h','C4h','CP4h','C6h','CP6h';
+                     'CCP4h','C4h','CP4h','CCP2','CCP4','C2','CP2','C4','CP4';
+                     'CCP2','C2','CP2','','CCP4h','','','C4h','CP4h';
+                     'CP4','CCP4','CPP4','CP4h','CP6h','CCP4h','CPP4h','CCP6h','CPP6h';
+                     'CP4h','CCP4h','CPP4h','CP2','CP4','CCP2','','CCP4','CPP4';
+                     'CP2','CCP2','','','CP4h','','','CCP4h','CPP4h';
+                     'CPP4','CP4','P4','CPP4h','CPP6h','CP4h','P4h','CP6h','P6h';
+                     'CPP4h','CP4h','P4h','','CPP4','CP2','','CP4','P4';
+                     'P4','CPP4','PPO4','P4h','P6h','CPP4h','PPO4h','CPP6h','PPO6h';
+                     'P4h','CPP4h','PPO4h','','P4','','','CPP4','PPO4';
+                     'PPO4','P4','PO4','PPO4h','PPO6h','P4h','','P6h','PO6h';
+                     'PPO4h','P4h','','','PPO4','','','P4','PO4';
+                     'PO4','PPO4','','','PO6h','PPO4h','','PPO6h',''};   
+
+% Left side refpts have similar labelling as right side refpts except
+% numarical value is one less than right side value. So left side
+% neighbours is obatained using right side neighbours.
+leftSide_refPts_neighbours = rightSide_refPts_neighbours;
+ for u = 1:length(leftSide_refPts_neighbours)
+    for v = 1:9
+        str = leftSide_refPts_neighbours{u,v};
+        if ~isempty(str)
+            B = char(regexp(str,'\d*','Match'));
+            str_replace = num2str(str2num(B)-1);
+            leftSide_refPts_neighbours{u,v} = strrep(str,B,str_replace);
+            if strcmp(str,'RPA')
+                leftSide_refPts_neighbours{u,v} = 'LPA';
+            end
+        end
+    end
+ end
+
+ top_refPts_neighbours ={'I1','I1h','','OI1','','OI1h','','','';
+                    'I1h','Iz','I1','OI1h','','OIz','OI1','','';
+                    'Iz','I2h','I1h','OIz','','OI2h','OI1h','','';
+                    'I2h','I2','Iz','OI2h','','OI2','OIz','','';
+                    'I2','','I2h','OI2','','','OI2h','','';
+                    'OI1','OI1h','','O1','I1','O1h','','I1h','';
+                    'OI1h','OIz','OI1','O1h','I1h','Oz','O1','Iz','I1';
+                    'OIz','OI2h','OI1h','Oz','Iz','O2h','O1h','I2h','I1h';
+                    'OI2h','OI2','OIz','O2h','I2h','O2','Oz','I2','Iz';
+                    'OI2','','OI2h','O2','I2','','O2h','','I2h';
+                    'O1','O1h','','POO3','OI1','POO1','','OI1h','';
+                    'O1h','Oz','O1','POO1','OI1h','POOz','POO3','OIz','OI1';
+                    'Oz','O2h','O1h','POOz','OIz','POO2','POO1','OI2h','OI1h';
+                    'O2h','O2','Oz','POO2','OI2h','POO4','POOz','OI2','OIz';
+                    'O2','','O2h','POO4','OI2','','POO2','','OI2h';
+                    'POO3','POO1','','PO3h','O1','PO1','','O1h','';
+                    'POO1','POOz','POO3','PO1','O1h','POz','PO3h','Oz','O1';
+                    'POOz','POO2','POO1','POz','Oz','PO2','PO1','O2h','O1h';
+                    'POO2','POO4','POOz','PO2','O2h','PO4h','POz','O2','Oz';
+                    'POO4','','POO2','PO4h','O2','','PO2','','O2h';
+                    'PO3h','PO1','','PPO1','POO3','PPO1h','','POO1','';
+                    'PO1','PO1h','PO3h','PPO1h','POO1','PPOz','PPO1','POOz','POO3';
+                    'PO1h','POz','PO1','','','','','','';
+                    'POz','PO2h','PO1h','PPOz','POOz','PPO2h','PPO1h','POO2','POO1';
+                    'PO2h','PO2','POz','','','','','','';
+                    'PO2','PO4h','PO2h','PPO2h','POO2','PPO2','PPOz','POO4','POOz';
+                    'PO4h','','PO2','PPO2','POO4','','PPO2h','','POO2';
+                    'PPO1','PPO1h','','P1','PO3h','P1h','','PO1','';
+                    'PPO1h','PPOz','PPO1','P1h','PO1','Pz','P1','POz','PO3h';
+                    'PPOz','PPO2h','PPO1h','Pz','POz','P2h','P1h','PO2','PO1';
+                    'PPO2h','PPO2','PPOz','P2h','PO2','P2','Pz','PO4h','POz';
+                    'PPO2','','PPO2h','P2','PO4h','','P2h','','PO2';
+                    'P1','P1h','','CPP1','PPO1','CPP1h','','PPO1h','';
+                    'P1h','Pz','P1','CPP1h','PPO1h','CPPz','CPP1','PPOz','PPO1';
+                    'Pz','P2h','P1h','CPPz','PPOz','CPP2h','CPP1h','PPO2h','PPO1h';
+                    'P2h','P2','Pz','CPP2h','PPO2h','CPP2','CPPz','PPO2','PPOz';
+                    'P2','','P2h','CPP2','PPO2','','CPP2h','','PPO2h';
+                    'CPP1','CPP1h','','','P1','CP1h','','P1h','';
+                    'CPP1h','CPPz','CPP1','CP1h','P1h','CPz','','Pz','P1';
+                    'CPPz','CPP2h','CPP1h','CPz','Pz','CP2h','CP1h','P2h','P1h';
+                    'CPP2h','CPP2','CPPz','CP2h','P2h','','CPz','P2','Pz';
+                    'CPP2','','CPP2h','','P2','','CP2h','','P2h';
+                    'CP1h','CPz','','CCP1h','CPP1h','CCPz','','CPPz','CPP1';
+                    'CPz','CP2h','CP1h','CCPz','CPPz','CCP2h','CCP1h','CPP2h','CPP1h';
+                    'CP2h','','CPz','CCP2h','CPP2h','','CCPz','CPP2','CPPz';
+                    'CCP1h','CCPz','','C1h','CP1h','Cz','C1','CPz','';
+                    'CCPz','CCP2h','CCP1h','Cz','CPz','C2h','C1h','CP2h','CP1h';
+                    'CCP2h','','CCPz','C2h','CP2h','','Cz','','CPz';
+                    'C1','C1h','','FCC1','','FCC1h','','CCP1h','';
+                    'C1h','Cz','C1','FCC1h','CCP1h','FCCz','FCC1','CCPz','';
+                    'Cz','C2h','C1h','FCCz','CCPz','FCC2h','FCC1h','CCP2h','CCP1h';
+                    'C2h','','Cz','FCC2h','CCP2h','','FCCz','','CCPz';
+                    'FCC1','FCC1h','','FC1','C1','FC1h','','C1h','';
+                    'FCC1h','FCCz','FCC1','FC1h','C1h','FCz','FCz','Cz','C1';
+                    'FCCz','FCC2h','FCC1h','FCz','Cz','FC2h','FC1h','C2h','C1h';
+                    'FCC2h','','FCCz','FC2h','C2h','FC2','FCz','','Cz';
+                    'FC1','FC1h','','FFC1','FCC1','FFC1h','','FCC1h','';
+                    'FC1h','FCz','FC1','FFC1h','FCC1h','FFCz','FFC1','FCCz','FCC1';
+                    'FCz','FC2h','FC1h','FFCz','FCCz','FFC2h','FFC1h','FCC2h','FCC1h';
+                    'FC2h','FC2','FCz','FFC2h','FCC2h','FFC2','FFCz','','FCCz';
+                    'FC2','','FC2h','FFC2','','','FFC2h','','FCC2h';
+                    'FFC1','FFC1h','','F1','FC1','F1h','','FC1h','';
+                    'FFC1h','FFCz','FFC1','F1h','FC1h','Fz','F1','FCz','FC1';
+                    'FFCz','FFC2h','FFC1h','Fz','FCz','F2h','F1h','FC2h','FC1h';
+                    'FFC2h','FFC2','FFCz','F2h','FC2h','F2','Fz','FC2','FCz';
+                    'FFC2','','FFC2h','F2','FC2','','F2h','','FC2h';
+                    'F1','F1h','','AFF3h','FFC1','AFF1','','FFC1h','';
+                    'F1h','Fz','F1','AFF1','FFC1h','AFFz','AFF3h','FFCz','FFC1';
+                    'Fz','F2h','F1h','AFFz','FFCz','AFF2','AFF1','FFC2h','FFC1h';
+                    'F2h','F2','Fz','AFF2','FFC2h','AFF4h','AFFz','FFC2','FFCz';
+                    'F2','','F2h','AFF4h','FFC2','','AFF2','','FFC2h';
+                    'AFF3h','AFF1','','F1','AF3','F1h','','AF1',''; % slight order change from here
+                    'AFF1','AFF1h','AFF3h','F1h','AF1','Fz','F1','AFz','AF3'; 
+                    'AFF1h','AFFz','AFF1','','','','','','';
+                    'AFFz','AFF2h','AFF1h','Fz','AFz','F2h','F1h','AF2','AF1';
+                    'AFF2h','AFF2','AFFz','','','','','','';
+                    'AFF2','AFF4h','AFF2h','F2h','AF2','F2','Fz','AF4','AFz';
+                    'AFF4h','','AFF2','F2','AF4','','F2h','','AF2';
+                    'AF3','AF3h','','AFF3h','AFp5','AFF1','','AFp3','';
+                    'AF3h','AF1','AF3','','','','','','';
+                    'AF1','AF1h','AF3h','AFF1','AFp3','AFFz','AFF3h','AFpz','AFp5';
+                    'AF1h','AFz','AF1','','','','','','';
+                    'AFz','AF2h','AF1h','AFFz','AFpz','AFF2','AFF1','AFp4','AFp3';
+                    'AF2h','AF2','AFz','','','','','','';
+                    'AF2','AF4h','AF2h','AFF2','AFp4','AFF4h','AFFz','AFp6','AFpz';
+                    'AF4h','AF4','AF2','','','','','','';
+                    'AF4','','AF4h','AFF4h','AFp6','','AFF2','','AFp4';
+                    'AFp5','AFp3','','AF3','Fp1','AF1','','Fp1h','';
+                    'AFp3','AFp1','AFp5','AF1','Fp1h','AFz','AF3','Fpz','Fp1';
+                    'AFp1','AFpz','AFp3','','','','','','';
+                    'AFpz','AFp2','AFp1','AFz','Fpz','AF2','AF1','Fp2h','Fp1h';
+                    'AFp2','AFp4','AFpz','','','','','','';
+                    'AFp4','AFp6','AFp2','AF2','Fp2h','AF4','AFz','Fp2','Fpz';
+                    'AFp6','','AFp4','AF4','Fp2','','AF2','','Fp2h';
+                    'Fp1','Fp1h','','AFp5','NFp1','AFp3','','NFp1h','';
+                    'Fp1h','Fpz','Fp1','AFp3','NFp1h','AFpz','AFp5','NFpz','NFp1';
+                    'Fpz','Fp2h','Fp1h','AFpz','NFpz','AFp4','AFp3','NFp2h','NFp1h';
+                    'Fp2h','Fp2','Fpz','AFp4','NFp2h','AFp6','AFpz','NFp2','NFpz';
+                    'Fp2','','Fp2h','AFp6','NFp2','','AFp4','','NFp2h';
+                    'NFp1','NFp1h','','Fp1','N1','Fp1h','','N1h','';
+                    'NFp1h','NFpz','NFp1','Fp1h','N1h','Fpz','Fp1','Nz','N1';
+                    'NFpz','NFp2h','NFp1h','Fpz','Nz','Fp2h','Fp1h','N2h','N1h';
+                    'NFp2h','NFp2','NFpz','Fp2h','N2h','Fp2','Fpz','N2','Nz';
+                    'NFp2','','NFp2h','Fp2','N2','','Fp2h','','N2h';
+                    'N1','N1h','','NFp1','','NFp1h','','','';
+                    'N1h','Nz','N1','NFp1h','','NFpz','NFp1','','';
+                    'Nz','N2h','N1h','NFpz','','NFp2h','NFp1h','','';
+                    'N2h','N2','Nz','NFp2h','','NFp2','NFpz','','';
+                    'N2','','N2h','NFp2','','','NFp2h','',''};
