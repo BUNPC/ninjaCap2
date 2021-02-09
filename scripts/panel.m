@@ -241,7 +241,16 @@ topPanel  = union(topPanel,top_overlap_poly);
 %% 
 sideLeftOutline_poly = polybuffer(sideLeftOutline(sideLeftIdx(2)+1:end,:)-min(sideLeftOutline,[],1), 'lines', 1, 'JointType', 'square');
 sideRightOutline_poly = polybuffer(sideRightOutline(sideRightIdx(2)+1:end,:)-min(sideRightOutline,[],1), 'lines', 1, 'JointType', 'square');
-topOutline_lattice = [topOutline(topIdx(2):topIdx(3),1:2); [NaN NaN]; topOutline(topIdx(4):end,:); topOutline(1,:)];
+topOutline_side1 = topOutline(topIdx(2):topIdx(3),:);
+topOutline_side2 = [topOutline(topIdx(4):end,:); topOutline(1,:)];
+outline_overlap = 10;
+side1_ext1 = topOutline_side1(1,:)+(outline_overlap*(topOutline_side1(1,:)-topOutline_side1(2,:))/norm(topOutline_side1(1,:)-topOutline_side1(2,:)));
+side1_ext12 = topOutline_side1(end,:)+(outline_overlap*(topOutline_side1(end,:)-topOutline_side1(end-1,:))/norm(topOutline_side1(end,:)-topOutline_side1(end-1,:)));
+topOutline_side1 = [side1_ext1; topOutline_side1; side1_ext12];
+side2_ext1 = topOutline_side2(1,:)+(outline_overlap*(topOutline_side2(1,:)-topOutline_side2(2,:))/norm(topOutline_side2(1,:)-topOutline_side2(2,:)));
+side2_ext12 = topOutline_side2(end,:)+(outline_overlap*(topOutline_side2(end,:)-topOutline_side2(end-1,:))/norm(topOutline_side2(end,:)-topOutline_side2(end-1,:)));
+topOutline_side2 = [side2_ext1; topOutline_side2; side2_ext12];
+topOutline_lattice = [topOutline_side1; [NaN NaN]; topOutline_side2];
 topOutline_poly =  polybuffer(topOutline_lattice-min(topOutline,[],1), 'lines', 1, 'JointType', 'square');
 
 %%
