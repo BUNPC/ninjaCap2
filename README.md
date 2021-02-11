@@ -64,9 +64,9 @@ Please make sure you follow the keep out guidelines shown [here](https://github.
     1. (optional, advanced) provide your custom .STL elements to be placed with corresponding grommet IDs. These elements can be grommets, straps, cases, anything. Place them in '.../ninjaCap/stl/elements/<identifier>/'. For this to work, you need to follow the ID-/file-/folder- naming conventions outlined [here](https://github.com/neuluce/ninjaCap/blob/master/docu/grommet_lookup.pdf).
 	
 ## 2. Generate the ninjaCap 
-1. Open matlab, go to AtlasViewer directory and add AtlasViewer directory to matlab path by running command 'addpath(genpath('.'))' in the matlab command line. 
+1. Open matlab, go to AtlasViewer directory and add AtlasViewer directory to matlab path by running the command 'addpath(genpath('.'))' in the matlab command line. 
 
-2. Go to ninjaCap2 directory and add ninjaCap2 directory to matlab path by running command 'addpath(genpath('.'))' in the matlab command line.
+2. Go to ninjaCap2 directory and add ninjaCap2 directory to matlab path by running the command 'addpath(genpath('.'))' in the matlab command line.
 
 3. Now go to the "probe.SD" directory and run the function '* generateNinjaCap.m*'. The only argument for this function is the desired head circumference in cm. To generate a cap with 56cm headcircumference, run ' generateNinjaCap(56)'. If you do not provide an argument, 56cm is assumed per default. Watch your cap being built. By the end of the process, matlab open a Blender3D workspace.
 
