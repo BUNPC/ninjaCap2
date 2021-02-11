@@ -52,7 +52,7 @@ Follow the typical process to generate a probe with the AtlasViewer SDgui. Then,
 Please note for Short Separation (SS) channels: Depending on the type of grommet you choose, short separation channels (holes for a SS fiber) are typically already included. In your SD probe layout, you might have added dedicated SS optodes. If you did, just give those a “#NONE” ID to skip the placement of a dedicated element at the SS optode location.
 
 Please make sure you follow the keep out guidelines shown [here](https://github.com/neuluce/ninjaCap/blob/master/docu/guidelines_keepOutRegions): If you place grommets in the keep out region, they will overlap with the ear slits.
-![](https://github.com/neuluce/ninjaCap/blob/master/docu/keepout.png)
+![](https://github.com/neuluce/ninjaCap2/blob/master/docu/keepout.png)
 
 # HOW TO BUILD A CAP 
 
@@ -70,10 +70,10 @@ Please make sure you follow the keep out guidelines shown [here](https://github.
 
 3. Now go to the "probe.SD" directory and run the function '* generateNinjaCap.m*'. The only argument for this function is the desired head circumference in cm. To generate a cap with 56cm headcircumference, run ' generateNinjaCap(56)'. If you do not provide an argument, 56cm is assumed per default. Watch your cap being built. By the end of the process, matlab open a Blender3D workspace.
 
-![](https://github.com/neuluce/ninjaCap/blob/master/docu/matlab.PNG)
+![](https://github.com/neuluce/ninjaCap2/blob/master/docu/matlab.PNG)
 4. In the Blender workspace, the python script 'nynja_blender_exec.py' (ninjaCap root directory) should already be loaded per default on the right hand side. If for any case it isnt or you have your own Blender workspace, open the script window and load the script. Run the script by pressing ALT+P or clicking on 'Text -> Run Script' in the script window.
 
-![](https://github.com/neuluce/ninjaCap/blob/master/docu/blender.png)
+![](https://github.com/neuluce/ninjaCap2/blob/master/docu/blender.png)
 
 When blender has done its work, close it. This will also terminate the running matlab script.
 
@@ -83,7 +83,7 @@ You should find four .STL files there: 'sideLeft_proc.STL', 'sideRight_proc.STL'
 These files can now be 3D printed. For this, use ninjaflex material with the CURA LulzBot Taz 6 Aerostruder and the printing profile 'ninjaCap_profile.curaprofile' that is also provided in the '.../ninjaCap2/print/' subdirectory.
 If you want to view the files before moving on to the 3D printing step, you can open them with any STL viewer, such as for example [Meshlab](https://sourceforge.net/projects/meshlab/).
 
-![](https://github.com/neuluce/ninjaCap/blob/master/docu/cap.PNG)
+![](https://github.com/neuluce/ninjaCap2/blob/master/docu/cap.PNG)
 
 
 ## 4. Finish the cap
