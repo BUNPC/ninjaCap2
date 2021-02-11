@@ -1,0 +1,18 @@
+Average solution for 56cm HC and both sexes
+
+
+				Real		Input to Atlas Viewer		AtlasViewer Fit		Input to Atlas Viewer 
+						(corrects underfit)		(Head Dimensions)	Uniformly Scaled (x1.09)
+Head Circumference (cm)		56.00		57.00				55.7			62.13
+Iz to Nz (cm)			35.49		36.4				35.5			39.68
+RPA to LPA (cm)			35.68		35.0				35.7			38.15
+
+
+based on scaled Collin:		Real		Input to Atlas Viewer 		AtlasViewer Fit		Uniformly Scaled (x1.09)
+(David prefers this)				(corrects underfit)		(Head Dimensions)	(input)/fit
+
+Head Circumference (cm)		560.0		57.4 cm				560.2			(62.57)/613.0
+Iz to Nz (cm)			364.3		37.6 cm				364.8			(40.98)/398.8
+RPA to LPA (cm)			351.8		34.2 cm				351.2			(37.28)/385.1
+
+https://upload.wikimedia.org/wikipedia/commons/0/06/AvgHeadSizes.png
