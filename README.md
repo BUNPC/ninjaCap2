@@ -1,7 +1,7 @@
-# ninjaCap Repo: BRIEF DESCRIPTION
+# ninjaCap2 Repo: BRIEF DESCRIPTION
 This repository contains the complete framework necessary to generate ninjaCaps. 
 This help file explains how to set up and run the ninjacap code using matlab and the blender-python integration. 
-Last major version: March 2020 by AvL - avolu@bu.edu
+Last major version: Feb 2021.
 
 Inputs to this framework are
 1. a "probe.SD" file that describes the geometrical setup (as documented in the Homer3 / AtlasViewer toolbox)
@@ -17,12 +17,11 @@ Install the latest version of AtlasViewer and Homer3 (sourcecode, not the execut
 https://github.com/BUNPC/Homer3
 Don't forget to install the toolbox by running "setpaths" (see AtlasViewer/Homer3 documentation).
 
-## 2. Get the latest version of ninjaCap code
-you are already here: make a local copy of this repository (https://github.com/neuluce/ninjaCap).
-Add the function "generate.m" in the ninjacap root directory to matlabs default paths.
+## 2. Get the latest version of ninjaCap2 code
+you are already here: make a local copy of this repository (https://github.com/neuluce/ninjaCap2).
 
 ## 3. Install Blender 2.82 64Bit 
-Please note that the ninjacap python script may or may not be compatible with older/other versions, 
+Please note that the ninjacap2 python script may or may not be compatible with older/other versions, 
 as blender python commands might be subject to changes over time.
 You can get it here:		https://www.blender.org/download/releases/2-82/
 
@@ -58,26 +57,30 @@ Please make sure you follow the keep out guidelines shown [here](https://github.
 # HOW TO BUILD A CAP 
 
 ## 1. Provide all relevant files:
-1. place the "probe.SD" file in the '.../ninjaCap/' root directory.
+1. place the "probe.SD" file in a new directory.
 1. the following **optional** steps are available, but are not necessary by default:
     1. (optional) provide your own 'atlasViewer.mat' headmodel in the root '.../ninjaCap/' directory
     1. (optional) provide your custom side outline .svg file in the '.../ninjaCap/svg/' directory. -> change the filename in 'ninjaCap/matfun/cap.m' accordingly, if you did not use the default names 'side_piece1.svg' and 'side_piece2.svg'.
     1. (optional, advanced) provide your custom .STL elements to be placed with corresponding grommet IDs. These elements can be grommets, straps, cases, anything. Place them in '.../ninjaCap/stl/elements/<identifier>/'. For this to work, you need to follow the ID-/file-/folder- naming conventions outlined [here](https://github.com/neuluce/ninjaCap/blob/master/docu/grommet_lookup.pdf).
 	
 ## 2. Generate the ninjaCap 
-1. Open matlab, move to the ninjaCap root directory and run the function '*generate.m*'. The only argument for this function is the desired head circumference in cm. To generate a cap with 56cm headcircumference, run 'generate(56)'. If you do not provide an argument, 56cm is assumed per default. Watch your cap being built. By the end of the process, matlab open a Blender3D workspace.
+1. Open matlab, go to AtlasViewer directory and add AtlasViewer directory to matlab path by running command 'addpath(genpath('.'))' in the matlab command line. 
+
+2. Go to ninjaCap2 directory and add ninjaCap2 directory to matlab path by running command 'addpath(genpath('.'))' in the matlab command line.
+
+3. Now go to the "probe.SD" directory and run the function '* generateNinjaCap.m*'. The only argument for this function is the desired head circumference in cm. To generate a cap with 56cm headcircumference, run ' generateNinjaCap(56)'. If you do not provide an argument, 56cm is assumed per default. Watch your cap being built. By the end of the process, matlab open a Blender3D workspace.
 
 ![](https://github.com/neuluce/ninjaCap/blob/master/docu/matlab.PNG)
-2. In the Blender workspace, the python script 'nynja_blender_exec.py' (ninjaCap root directory) should already be loaded per default on the right hand side. If for any case it isnt or you have your own Blender workspace, open the script window and load the script. Run the script by pressing ALT+P or clicking on 'Text -> Run Script' in the script window.
+4. In the Blender workspace, the python script 'nynja_blender_exec.py' (ninjaCap root directory) should already be loaded per default on the right hand side. If for any case it isnt or you have your own Blender workspace, open the script window and load the script. Run the script by pressing ALT+P or clicking on 'Text -> Run Script' in the script window.
 
 ![](https://github.com/neuluce/ninjaCap/blob/master/docu/blender.png)
 
 When blender has done its work, close it. This will also terminate the running matlab script.
 
 ## 3. Get and print the ninjaCap files
-The fully generated and assembled ninjaCap panels are saved in the '.../ninjaCap/print/' subdirectory.
+The fully generated and assembled ninjaCap panels are saved in the '.../ninjaCap2/print/' subdirectory.
 You should find four .STL files there: 'sideLeft_proc.STL', 'sideRight_proc.STL', 'top1_proc.STL' and 'top2_proc_STL'.
-These files can now be 3D printed. For this, use ninjaflex material with the CURA LulzBot Taz 6 Aerostruder and the printing profile 'ninjaCap_profile.curaprofile' that is also provided in the '.../ninjaCap/print/' subdirectory.
+These files can now be 3D printed. For this, use ninjaflex material with the CURA LulzBot Taz 6 Aerostruder and the printing profile 'ninjaCap_profile.curaprofile' that is also provided in the '.../ninjaCap2/print/' subdirectory.
 If you want to view the files before moving on to the 3D printing step, you can open them with any STL viewer, such as for example [Meshlab](https://sourceforge.net/projects/meshlab/).
 
 ![](https://github.com/neuluce/ninjaCap/blob/master/docu/cap.PNG)
@@ -87,7 +90,7 @@ If you want to view the files before moving on to the 3D printing step, you can 
 With all the panels printed, you now need to assemble the cap, e.g. with an ultrasonic welder. Done.
 
 # DIRECTORY AND FILE STRUCTURE
-The ninjaCap repository has all main scripts and workspaces that need to be executed in the root directory. The subdirectories provide documentation, auxiliary functions, templates, user inputs, generated files, and so forth. This structure is documented in the following:
+The ninjaCap2 repository has all main scripts and workspaces that need to be executed in the root directory. The subdirectories provide documentation, auxiliary functions, templates, user inputs, generated files, and so forth. This structure is documented in the following:
 
 ![](https://github.com/neuluce/ninjaCap/blob/master/docu/dirstruct.PNG)
 
@@ -95,7 +98,7 @@ The ninjaCap repository has all main scripts and workspaces that need to be exec
 * /extfun/ - contains external matlab scripts, e.g. from matlab central, including the corresponding license files
 * /fw/ - a default AtlasViewer directory (**ignore**)
 * /imagerecon/ - a default AtlasViewer directory (**ignore**)
-* /matfun/ - contains all ninjaCap matlab scripts and functions called by 'generate.m' and its subroutines.
+* /scripts/ - contains all ninjaCap matlab scripts and functions called by 'generate.m' and its subroutines.
 * /print/ - contains the results of the ninjaCap generation process. You find your .STL files for 3D printing, and the 3D printing profile in here.
 * /stl/ - contains (subfolders with) the cap elements that are generated by the matlab routines, as well as element templates (grommets, chinstraps, etc..). The Blender Python script assembles the cap using these elements.
 * /svg/ - contains .svg files for the outline of the sidepieces. 
