@@ -70,7 +70,6 @@ Please make sure you follow the keep out guidelines shown [here](https://github.
 
 3. Now go to the "probe.SD" directory and run the function '* generateNinjaCap.m*'. The only argument for this function is the desired head circumference in cm. To generate a cap with 56cm headcircumference, run ' generateNinjaCap(56)'. If you do not provide an argument, 56cm is assumed per default. Watch your cap being built. By the end of the process, matlab open a Blender3D workspace.
 
-![](https://github.com/neuluce/ninjaCap2/tree/main/docu/matlab.PNG)
 4. In the Blender workspace, the python script 'nynja_blender_exec.py' (ninjaCap root directory) should already be loaded per default on the right hand side. If for any case it isnt or you have your own Blender workspace, open the script window and load the script. Run the script by pressing ALT+P or clicking on 'Text -> Run Script' in the script window.
 
 ![](https://github.com/neuluce/ninjaCap/blob/master/docu/blender.png)
