@@ -13,14 +13,8 @@ for u = 1:length(grommets)
     end
 end
 %%
-% leftPos = [grommets(leftSideIdx).posPanel];
-% rightPos = [grommets(rightSideIdx).posPanel];
-% topPos = [grommets(topIdx).posPanel];
-% dist_lessthan = 25/2;
-%%
 includeLeftExtension = zeros(size(C(2).eSeamExt,1),1);
 for u = 1:length(leftSideIdx)
-    u
     pt = grommets(leftSideIdx(u)).posPanel;
     grommet_type = grommets(leftSideIdx(u)).type;
     if ~strcmp(grommet_type,'#DUMMY')
@@ -65,18 +59,6 @@ for u = 1:length(topIdx)
         includeTopRightExtension(dist<=grommet_max_size) = 1;
     end
 end
-%%
-
-% for u = 1:length(topIdx)
-%     pt = grommets(topIdx(u)).posPanel;
-%     grommet_type = grommets(topIdx(u).type);
-%     idx = find(ismember(grommetDimensions(:,1),grommet_type)==1);
-%     grommet_max_size = max(grommetDimensions{idx,2:3})/2;
-%     dist = sqrt(sum((C(3).eSeamExtRot(:,1:2)-pt).^2,2));
-%     includeTopRightExtension(dist<=grommet_max_size) = 1;
-%     dist = sqrt(sum((C(3).eSeamExtRot(:,3:4)-pt).^2,2));
-%     includeTopRightExtension(dist<=grommet_max_size) = 1;
-% end
 
 %%
 % if length of the overlap strut is smaller than add second order extension
