@@ -1,5 +1,6 @@
-function [sideOutline, grommets, topIdx, ear_slit_pos] = mapPanelandGrommets(grommets, springList, refpts, refpts_idx, panel3DVertices, refPts_neighbours, panel_name,outline_idx_to_include)
+function [sideOutline, grommets, topIdx, ear_slit_or_Cz_pos] = mapPanelandGrommets(grommets, springList, refpts, refpts_idx, panel3DVertices, refPts_neighbours, panel_name,outline_idx_to_include)
 
+% get points on outline seam that are closer to refPts
 panel3DVertices_01mm = getEquiDistPtsAlongOutline(panel3DVertices,0.1);
 refpts_outline = [];
 refpts_outline_label = {};
@@ -19,6 +20,9 @@ end
 [refpts_outline,ia,ic] = unique(refpts_outline,'rows','stable');
 refpts_outline_label = refpts_outline_label(ia);
 outline_refpts_idx = outline_refpts_idx(ia);
+
+% If outline_idx_to_include parameter is passed then add those points to seam outline
+% points. Here we used it to include corner points on top seam outline
 if nargin > 7
     [outline_refpts_idx, sort_idx] = sort(outline_refpts_idx);
     refpts_outline = refpts_outline(sort_idx,:);
@@ -28,7 +32,6 @@ if nargin > 7
         pt = panel3DVertices(outline_idx_to_include(u),:);
         dist = sqrt(sum((panel3DVertices_01mm-pt).^2,2));
         [~,idx] = min(dist);
-%         pt = panel3DVertices_01mm(idx,:);
         idx_to_add = [idx_to_add; idx];
     end
     idx_to_add  = sort(idx_to_add );
@@ -46,6 +49,8 @@ else
     topIdx = [];
 end
 %%
+
+% create vertices and edges list for spring relaxation
 vHex = [];
 eHex= [];
 hHex = [];
@@ -86,6 +91,7 @@ end
 vHex_refpts_length = size(vHex,1);
 
 %%
+% add connections along outline seam points and between seam and refPts
 for u = 1:length(outline_refpts_idx)
     vHex = [vHex; panel3DVertices_01mm(outline_refpts_idx(u),:)];
     idx = find(ismember(refpts.labels,refpts_outline_label(u))==1);
@@ -96,13 +102,17 @@ for u = 1:length(outline_refpts_idx)
         eHex = [eHex; [size(vHex,1)-1 size(vHex,1)]];
     end
 end
-% for top panel adding edge between last outline point and first outline
-% point
+
+% for top panel adding edge between last and first point
 if strcmp(panel_name,'top')
     idx = find(ismember(vHex,panel3DVertices_01mm(outline_refpts_idx(1),:),'rows')==1);
     eHex = [eHex; [size(vHex,1) idx]];
 end
 vHex_outline_idx = vHex_refpts_length+1:size(vHex,1);
+
+% Add cross connections between seam outline refPts. Currently it cross
+% connections are if distance between refPt and outline is greater than
+% 5mm. But I think it also should work if ignore distance condition.
 for  u = 1:length(outline_refpts_idx)-1
     out_idx1 = find(ismember(vHex,refpts_outline(u,:),'rows')==1);
     out_idx2 = find(ismember(vHex,refpts_outline(u+1,:),'rows')==1);
@@ -122,6 +132,9 @@ for  u = 1:length(outline_refpts_idx)-1
 end
 
 %%
+
+% add connection between grommets based on springList and also connect
+% grommet to nearest two refPts.
 ref_length = size(vHex,1);
 gidx = [];
 for u = 1:length(grommets)
@@ -173,7 +186,6 @@ vHex_grommets_idx = vHex_refpts_length+length(vHex_outline_idx)+1:size(vHex,1);
 ref_elength = size(eHex,1)-size(geHex,1);
 for u = ref_length+1:size(vHex,1)
     dist = sqrt(sum((vHex(1:ref_length,:)-vHex(u,:)).^2,2));
-%     [~,min_idx] = min(dist);
     [~,sort_idx] = sort(dist);
     for v = 1:2
         eHex = [eHex; [u sort_idx(v)]];
@@ -181,8 +193,11 @@ for u = ref_length+1:size(vHex,1)
 end
 
 %%
+
+% get distnace between connections.
 hHex  = sqrt(sum((vHex(eHex(:,1),:)-vHex(eHex(:,2),:)).^2,2));
  
+% run spring relaxation and push cap to 2D plane
 pTopInt = [160 140];
 vHex2 = SpringRelax_func( vHex, eHex, hHex );
 
@@ -240,6 +255,8 @@ eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
 % hold off
 % axis equal
 
+% retrieve 2D seam outline points and also LPA and RPA positions for side
+% panels for positioning ear slit.
 sideOutline = vHex2(vHex_outline_idx,:);
 if strcmp(panel_name,'sideLeft') || strcmp(panel_name,'sideRight')
     sideOutline  = flipud(sideOutline);
@@ -248,16 +265,29 @@ if strcmp(panel_name,'sideLeft')
     idx = find(ismember(refpts.labels,'LPA')==1);
     LPA_pos = refpts.pos(idx,:);
     vHex_idx = find(ismember(vHex, LPA_pos ,'rows')==1);
-    ear_slit_pos = vHex2(vHex_idx ,:);
+    ear_slit_or_Cz_pos = vHex2(vHex_idx ,:);
 elseif strcmp(panel_name,'sideRight')
     idx = find(ismember(refpts.labels,'RPA')==1);
     RPA_pos = refpts.pos(idx,:);
     vHex_idx = find(ismember(vHex, RPA_pos ,'rows')==1);
-    ear_slit_pos = vHex2(vHex_idx ,:);
+    ear_slit_or_Cz_pos = vHex2(vHex_idx ,:);
 else
-    ear_slit_pos = [];
+    idx = find(ismember(refpts.labels,'Cz')==1);
+    LPA_pos = refpts.pos(idx,:);
+    vHex_idx = find(ismember(vHex, LPA_pos ,'rows')==1);
+    ear_slit_or_Cz_pos = vHex2(vHex_idx ,:);
 end
 
+side3Doutline = vHex(vHex_outline_idx,:);
+figure; plot3(side3Doutline(:,1), side3Doutline(:,2),side3Doutline(:,3));
+hold on;
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel,  panel_name) && ~strcmp(x.type, '#NONE'), grommets)).posHead);
+if ~isempty(a)
+    scatter3(a(:, 1), a(:, 2), a(:, 3));
+end
+hold off;
+axis equal
+% assign grommet 2 panel position
 for u = 1:length(gvOrder)
     grommets(gvOrder(u)).posPanel = vHex2(vHex_grommets_idx(u),1:2);
 end
