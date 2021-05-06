@@ -48,6 +48,12 @@ for j = 1:length(grommets)
         right_idx = [right_idx; j];
     end
 end
+%% Delete dummy grommets from grommets and springList
+optType = ~arrayfun(@(x) strcmp(x.type,'#DUMMY'), grommets);
+dummy_optodes = find(optType==0);
+grommets = grommets(optType);
+spring_dummy_idx = springList(:,1) >=min(dummy_optodes) | springList(:,2) >= min(dummy_optodes);
+springList(spring_dummy_idx,:) = [];
 %% get 2D panel seams and grommet positions on 2D panels
 
 % get refPts connected neighbours information
@@ -304,13 +310,19 @@ topPanel(5) = topPanel(2);
 
 % SETTINGS
 max_size = [270 270]; % mm
+buffer = 0; % mm in overlap along boundaries
+
+topPanel_temp = cut(topPanel, max_size, buffer);
+sideLeftPanel_temp = cut(sideLeftPanel, max_size, buffer);
+sideRightPanel_temp = cut(sideRightPanel, max_size, buffer);
+
+grommets = cutGrommets(grommets, topPanel_temp, sideLeftPanel_temp, sideRightPanel_temp);
+
 buffer = 5; % mm in overlap along boundaries
 
 topPanel = cut(topPanel, max_size, buffer);
 sideLeftPanel = cut(sideLeftPanel, max_size, buffer);
 sideRightPanel = cut(sideRightPanel, max_size, buffer);
-
-grommets = cutGrommets(grommets, topPanel, sideLeftPanel, sideRightPanel);
 
 
 %% Debug grommets
@@ -424,7 +436,12 @@ for i = 1:size(sideRightPanel, 1) % for each right side piece
     end
 end
 
-
+%% If rotation values are string convert them to int. But this shouldn't happen, fix it in SDGui.
+for u = 1:length(grommets)
+    if ischar(grommets(u).rot)
+        grommets(u).rot = str2num(grommets(u).rot);
+    end
+end
 
 %% Save positions of grommets and other elements in STLs for python script
 IDXchStrapPoints = [10 11];
@@ -441,13 +458,17 @@ shifted_topOutline = topOutline-min(topOutline,[],1);
 [STLcoords] = getStlCoordinates(grommets, holders, aux, shifted_sideLeftOutline, shifted_sideRightOutline, sideLeftPanel, shifted_topOutline, sideOutsidePoints, IDXchStrapPoints);
 % add ear slit pos
 STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) -[10 10];
-STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) -[10 10];
+STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) -[-10 10];
+
+
+
+%%
 
 % add marker optode at Cz position
 % STLcoords.
 save('stl\cap\RefPts', '-struct', 'STLcoords')
 
 %% RUN SD SEPARATION VALIDATION
-sdseps= sdsepValid(grommets);
+% sdseps= sdsepValid(grommets);
 
 end

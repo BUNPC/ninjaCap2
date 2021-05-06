@@ -1,51 +1,52 @@
-function [v, f, refpts, grommets, sprintList] = loadAtlasViewer(atlasviewer_file)
+function [v, f, refpts, grommets, sprintList] = loadAtlasViewer_AVfile(SD)
 %LOADATLASVIEWER Summary of this function goes here
 %   Detailed explanation goes here
 
+% load('probe.SD','-mat')
 % short separation threshold
 short_separation_threshold = 12;
 
 % load file
-av = load(atlasviewer_file);
+% av = load(atlasviewer_file);
 
 %% get surface
-v = av.headsurf.mesh.vertices;
-f = av.headsurf.mesh.faces;
+v = SD.mesh.vertices;
+f = SD.mesh.faces;
 
 %% get referene points
-refpts = av.refpts;
+refpts = SD.refpts;
 
 %%
 % add grommet rot information as zeros if they are not available. (Check
 % this if this needs to be here or somewhere else)
- if ~isfield(av.probe,'SrcGrommetRot')
- end
+%  if ~isfield(av.probe,'SrcGrommetRot')
+%  end
 
 %% get grommets
 grommets = struct('type', {}, 'rot',[],'flags', {}, 'posHead', {}, 'panel', {}, 'panelIndex', {}, 'posPanel', {}, 'MList', {}, 'optType', {});
 
 %sources
-for i = 1:av.probe.nsrc
-    grommet = struct('type', av.probe.SrcGrommetType{i}, 'rot', av.probe.SrcGrommetRot(i),'flags', {{}}, 'posHead', av.probe.optpos_reg(i, :), ...
+for i = 1:SD.nSrcs
+    grommet = struct('type', SD.SrcGrommetType{i}, 'rot', SD.SrcGrommetRot(i),'flags', {{}}, 'posHead', SD.optpos_reg(i, :), ...
         'panel', '', 'panelIndex', [], 'posPanel', [nan nan], 'MList', [], 'optType', 1);
     grommets = [grommets grommet]; %#ok<AGROW> % append
 end
 %detectors
-for i = 1:av.probe.ndet
+for i = 1:SD.nDets
     % is short separation?
-    p = av.probe.optpos_reg(av.probe.nsrc + i, :);
+    p = SD.optpos_reg(SD.nSrcs + i, :);
     
     % make grommet
-    grommet = struct('type', av.probe.DetGrommetType{i},'rot', av.probe.DetGrommetRot(i), 'flags', {{}}, 'posHead', p, ...
+    grommet = struct('type', SD.DetGrommetType{i},'rot', SD.DetGrommetRot(i), 'flags', {{}}, 'posHead', p, ...
         'panel', '', 'panelIndex', [], 'posPanel', [nan nan], 'MList', [], 'optType', 2);
     
     % relevant sources
-    rs = av.probe.ml(av.probe.ml(:, 2) == i, 1);
+    rs = SD.MeasList(SD.MeasList(:, 2) == i, 1);
     
     % save relevant sources for measurement list
     grommet.MList = rs;
     
-    dist = sqrt(sum(bsxfun(@minus, av.probe.optpos_reg(rs, :), p) .^ 2, 2));
+    dist = sqrt(sum(bsxfun(@minus, SD.optpos_reg(rs, :), p) .^ 2, 2));
     if ~isempty(rs) && all(dist < short_separation_threshold)
         % flag it as a short separation detector
         grommet.flags{end + 1} = 'short-separation';
@@ -62,7 +63,7 @@ for i = 1:av.probe.ndet
 end
 % dummy
 % for i = 1:size(av.probe.al, 1)
-nOptodes = av.probe.nsrc + av.probe.ndet;
+nOptodes = SD.nSrcs + SD.nDets;
 % for i = 1:size(av.probe.al,1)
 %     % is short separation?
 %     anchorOptIdx = av.probe.al{i,1};
@@ -75,10 +76,10 @@ nOptodes = av.probe.nsrc + av.probe.ndet;
 %     end
 % end
 
-for i = nOptodes+1:av.probe.nopt
-     p = av.probe.optpos_reg(i,:);
+for i = nOptodes+1:size(SD.optpos_reg,1)
+     p = SD.optpos_reg(i,:);
      iDummy = i-nOptodes;
-     grommet = struct('type', av.probe.DummyGrommetType{iDummy},'rot', av.probe.DummyGrommetRot(iDummy), 'flags', {{}}, 'posHead', p, ...
+     grommet = struct('type', SD.DummyGrommetType{iDummy},'rot', SD.DummyGrommetRot(iDummy), 'flags', {{}}, 'posHead', p, ...
             'panel', '', 'panelIndex', [], 'posPanel', [nan nan], 'MList', [], 'optType', 3);
      grommets = [grommets grommet]; %#ok<AGROW> % append
 end
@@ -149,7 +150,7 @@ end
 hold off;
 
 %% get spring list
-sprintList = av.probe.sl;
+sprintList = SD.SpringList;
 
 end
 

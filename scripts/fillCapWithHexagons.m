@@ -111,12 +111,13 @@ for iO = 1:length(o)
     xy1 = [xx yy [xx(2:end); xx(1)] [yy(2:end); yy(1)] ];
     
     for iE = 1:size(o(iO).eOut,1)
+        iE
         xy2 = [o(iO).vOut(o(iO).eOut(iE,1),:) o(iO).vOut(o(iO).eOut(iE,2),:)];
         out = lineSegmentIntersect(xy1, xy2);
         idx = find(out.intAdjacencyMatrix==1);
         if o(iO).seamIs(idx)==0
             o(iO).v(end+1,:) = o(iO).vOut(o(iO).eOut(iE,1),:);
-            o(iO).v(end+1,:) = [out.intMatrixX(idx) out.intMatrixY(idx)]; %vOut(eOut(iE,2),:);
+            o(iO).v(end+1,:) = [out.intMatrixX(idx(1)) out.intMatrixY(idx(1))]; %vOut(eOut(iE,2),:);
             o(iO).e(end+1,:) = [size(o(iO).v,1)-1 size(o(iO).v,1)];
         end
     end
@@ -125,7 +126,7 @@ end
 %%
 % Work on struts crossing the seam
 for iO = 2:3
-    
+    iO
     v = o(iO).v;
     vOut = o(iO).vOut;
     e = o(iO).e;
@@ -145,13 +146,15 @@ for iO = 2:3
     eSeamXptsRot = zeros(size(eOut,1),6);
     
     for iE = 1:size(eOut,1)
+        iE
         idx = []; foo=0;
         while isempty(idx) % this was thrown in to deal with an outward edge that didn't cross the outline. This happens because of the discrete mask I use prior to this
-            xy2 = [vOut(eOut(iE,1),:) vOut(eOut(iE,2),:)+foo*(vOut(eOut(iE,2),:)-vOut(eOut(iE,1),:))];
+            xy2 = [vOut(eOut(iE,1),:)+foo*(vOut(eOut(iE,1),:)-vOut(eOut(iE,2),:)) vOut(eOut(iE,2),:)+foo*(vOut(eOut(iE,2),:)-vOut(eOut(iE,1),:))];
             foo = foo + 0.1;
             out = lineSegmentIntersect(xy1, xy2);
             idx = find(out.intAdjacencyMatrix==1);
         end
+        idx = idx(1)
         eSeamXidx(iE) = idx;
         if o(iO).seamIs(idx)==1
             eSeamX(iE) = 1;

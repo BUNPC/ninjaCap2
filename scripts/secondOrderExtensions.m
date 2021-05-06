@@ -50,9 +50,9 @@ for u = 1:length(topIdx)
         idx = find(ismember(grommetDimensions(:,1),grommet_type)==1);
         grommet_max_size = max(grommetDimensions{idx,2:3})/2;
         dist = sqrt(sum((C(2).eSeamExtRot(:,1:2)-pt).^2,2));
+        includeTopLeftExtension(dist<=grommet_max_size) = 1;
         dist = sqrt(sum((C(3).eSeamExtRot(:,1:2)-pt).^2,2));
         includeTopRightExtension(dist<=grommet_max_size) = 1;
-        includeTopLeftExtension(dist<=grommet_max_size) = 1;
         dist = sqrt(sum((C(2).eSeamExtRot(:,3:4)-pt).^2,2));
         includeTopLeftExtension(dist<=grommet_max_size) = 1;
         dist = sqrt(sum((C(3).eSeamExtRot(:,3:4)-pt).^2,2));
