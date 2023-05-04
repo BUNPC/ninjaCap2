@@ -14,7 +14,7 @@ v = SD.mesh.vertices;
 f = SD.mesh.faces;
 
 %% get referene points
-refpts = SD.refpts;
+refpts = SD.Landmarks;
 
 %%
 % add grommet rot information as zeros if they are not available. (Check

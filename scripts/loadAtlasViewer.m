@@ -149,7 +149,8 @@ end
 hold off;
 
 %% get spring list
-sprintList = av.probe.sl;
+% sprintList = av.probe.sl;
+sprintList = av.probe.registration.sl;
 
 end
 

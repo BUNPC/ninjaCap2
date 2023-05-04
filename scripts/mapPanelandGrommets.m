@@ -97,9 +97,11 @@ for u = 1:length(outline_refpts_idx)
     idx = find(ismember(refpts.labels,refpts_outline_label(u))==1);
     pos = refpts.pos(idx,:);
     idx = find(ismember(vHex,pos,'rows')==1);
-    eHex = [eHex; [idx size(vHex,1)]];
-    if u > 1
-        eHex = [eHex; [size(vHex,1)-1 size(vHex,1)]];
+    if ~isempty(idx)
+        eHex = [eHex; [idx size(vHex,1)]];
+        if u > 1
+            eHex = [eHex; [size(vHex,1)-1 size(vHex,1)]];
+        end
     end
 end
 
@@ -124,10 +126,14 @@ for  u = 1:length(outline_refpts_idx)-1
     ref_idx2 = find(ismember(vHex,pos,'rows')==1);
 
 %     if  sqrt(sum((vHex(out_idx1,:)-vHex(ref_idx1,:)).^2,2)) >5
+    if ~isempty(out_idx2) & ~isempty(ref_idx1)
         eHex = [eHex; [ref_idx1 out_idx2]];
+    end
 %     end
 %     if  sqrt(sum((vHex(out_idx2,:)-vHex(ref_idx2,:)).^2,2)) >5
+    if ~isempty(out_idx1) & ~isempty(ref_idx2)
         eHex = [eHex; [ref_idx2 out_idx1]];
+    end
 %     end
 end
 
@@ -199,9 +205,26 @@ for u = ref_length+1:size(vHex,1)
 end
 
 %%
+max_h = max(vHex(:,2));
 
+
+% vHex(:,2) = -(vHex(:,2)-max_h);
+% temp = vHex(:,2);
+% vHex(:,2) = vHex(:,3);
+% vHex(:,3) = temp;
+
+
+% if strcmp(panel_name,'top')
+%     max_x = max(vHex(:,1));
+%     vHex(:,1) = -(vHex(:,1)-max_x);
+% end
 % get distnace between connections.
 hHex  = sqrt(sum((vHex(eHex(:,1),:)-vHex(eHex(:,2),:)).^2,2));
+
+zero_dist_idx = find(hHex == 0);
+if ~isempty(zero_dist_idx)
+    hHex(zero_dist_idx) = 0.5;
+end
  
 % run spring relaxation and push cap to 2D plane
 
@@ -217,14 +240,17 @@ pTopInt = [160 140];
 
 for ii=1:2400
     vHex2 = SpringRelax_func( vHex2, eHex, hHex );
+%     figure; plot3(vHex2(:,1),vHex2(:,2),vHex2(:,3),'.'); axis equal
     
     lst = find(abs(vHex2(:,3))>0.1);
     vHex2(lst,3) = vHex2(lst,3) - sign(vHex2(lst,3))*0.1;
+    
     
     lst = find(vHex2(:,3)<0.5);
     vec = vHex2(lst,1:2)-ones(length(lst),1)*pTopInt;
     vec = vec ./ sum( vec.^2, 2).^0.5;
     vHex2(lst,1:2) = vHex2(lst,1:2) + 0.1 * vec;
+%     figure; plot3(vHex2(:,1),vHex2(:,2),vHex2(:,3),'.'); axis equal
     
 %     if ii == 1 || rem(ii,10) == 0
 %         %% make movie
@@ -323,6 +349,10 @@ dLen = eHexLen-hHex;
 figure
 hist( dLen, [-10:1:10] )
 
+% temp = vHex2(:,2);
+% vHex2(:,2) = vHex2(:,3);
+% vHex2(:,3) = temp;
+
 % figure
 % plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
 % hold on
@@ -361,16 +391,19 @@ end
 if strcmp(panel_name,'sideLeft')
     idx = find(ismember(refpts.labels,'LPA')==1);
     LPA_pos = refpts.pos(idx,:);
+%     LPA_pos = [LPA_pos(1) LPA_pos(3) -(LPA_pos(2)-max_h)];
     vHex_idx = find(ismember(vHex, LPA_pos ,'rows')==1);
     ear_slit_or_Cz_pos = vHex2(vHex_idx ,:);
 elseif strcmp(panel_name,'sideRight')
     idx = find(ismember(refpts.labels,'RPA')==1);
     RPA_pos = refpts.pos(idx,:);
+%     RPA_pos = [RPA_pos(1) RPA_pos(3) -(RPA_pos(2)-max_h)];
     vHex_idx = find(ismember(vHex, RPA_pos ,'rows')==1);
     ear_slit_or_Cz_pos = vHex2(vHex_idx ,:);
 else
     idx = find(ismember(refpts.labels,'Cz')==1);
     LPA_pos = refpts.pos(idx,:);
+%     LPA_pos = [-(LPA_pos(1)-max_x) LPA_pos(3) -(LPA_pos(2)-max_h)];
     vHex_idx = find(ismember(vHex, LPA_pos ,'rows')==1);
     ear_slit_or_Cz_pos = vHex2(vHex_idx ,:);
 end

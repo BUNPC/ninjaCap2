@@ -9,7 +9,7 @@
 % 4. your generated and assembled cap is saved in the folder \print\. Here
 % you also find a default 3D printing profile for Cura LULZBOT TAZ 6 using
 % ninjaflex.
-function [] = generateNinjaCap_AVfile(HC)
+function [] = generateNinjaCap_AVfile(target_circumference)
 
 load('probe.SD','-mat')
 dirSave = pwd;
@@ -20,8 +20,8 @@ if(~isdeployed)
     rootDir = fileparts(which(mfilename));
     cd(rootDir);
 end
-
-panel_AVfile(SD,HC)
+current_cirucmference = calcRefptsCircumf_ninjaCap(SD.Landmarks)/10;
+panel_AVfile(SD,target_circumference, current_cirucmference)
 %% add this folder and subfolders to paths
 % addpath(genpath(pwd))
 

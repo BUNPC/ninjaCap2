@@ -51,6 +51,7 @@ end
 avMainFilepath = which('AtlasViewerGUI.m');
 avAppDir = fileparts(avMainFilepath);
 avDataDir = filesepStandard([avAppDir, '/Data/Colin']);
+% avDataDir = [avAppDir filesep 'Data' filesep 'Colin'];
 AtlasViewerGUI(pwd, avDataDir, 'userargs');
 
 % scale head to corrected circumference
@@ -73,11 +74,31 @@ drawnow
 
 %% DELETE FILES
 delete([pwd filesep 'atlasViewer.mat']);
-delete([pwd filesep 'digpts.txt']);
-delete([pwd filesep 'digpts2mc.txt']);
+% delete([pwd filesep 'digpts.txt']);
+% delete([pwd filesep 'digpts2mc.txt']);
+
+delete([dirSave filesep 'atlasViewer.mat']);
+delete([dirSave filesep 'digpts.txt']);
+delete([dirSave filesep 'digpts2mc.txt']);
 
 %% RUN blender
 system('wrkspace.blend')
+
+
+%% Fix negitive z-coordinates issue with stl file
+% I think this happens in Blender. This is a simple fix here but in the
+% future need to fix in blender.
+
+stl_files = dir(['print' filesep '*.stl']);
+for u = 1:length(stl_files)
+    TR = stlread([stl_files(1).folder filesep stl_files(1).name]);
+    v = TR.Points;
+    idx = find(v(:,3) < 0);
+    v(idx,3) = 0;
+    f = TR.ConnectivityList;
+    TR = triangulation(f,v);
+    stlwrite( TR,[stl_files(1).folder filesep stl_files(1).name],'text');
+end
 
 %% COPY BLENDER OUTPUT TO WORKING DIRECTORY
 if ~isdir([dirSave filesep 'print'])
@@ -85,7 +106,7 @@ if ~isdir([dirSave filesep 'print'])
 end
 copyfile( ['print' filesep '*.stl'], [dirSave filesep 'print'] );
 copyfile( ['print' filesep '*.curaprofile'], [dirSave filesep 'print'] );
-
+copyfile( 'stl_image.png', [dirSave filesep 'print'] );
 cd(dirSave)
 
 end

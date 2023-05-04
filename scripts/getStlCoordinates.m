@@ -32,21 +32,22 @@ function [STLcoords] = getStlCoordinates(grommets, holders, aux, sideOutlineL, s
 % right side
 % STLcoords.sideRightPos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#DUMMY') && ~ismember('short-separation', x.flags), grommets)).posPanel);
 STLcoords.sideRightPos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#DUMMY'), grommets)).posPanel);
-STLcoords.sideRightID  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#DUMMY'), grommets)).type);
+STLcoords.sideRightID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#DUMMY'), grommets)).type};
 STLcoords.sideRightRot = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#DUMMY'),  grommets)).rot);
 % left side
 % % STLcoords.sideLeftPos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#DUMMY') && ~ismember('short-separation', x.flags), grommets)).posPanel);
 STLcoords.sideLeftPos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#DUMMY'), grommets)).posPanel);
-STLcoords.sideLeftID  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#DUMMY'), grommets)).type);
+STLcoords.sideLeftID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#DUMMY'), grommets)).type};
 STLcoords.sideLeftRot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#DUMMY'), grommets)).rot);
 % top pieces
 % STLcoords.top1Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.panelIndex ==1 && ~strcmp(x.type, '#DUMMY') && ~ismember('short-separation', x.flags), grommets)).posPanel);
 STLcoords.top1Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.panelIndex ==1 && ~strcmp(x.type, '#DUMMY'), grommets)).posPanel);
-STLcoords.top1ID  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==1, grommets)).type);
+STLcoords.top1ID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==1, grommets)).type};
 STLcoords.top1Rot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==1, grommets)).rot);
 % STLcoords.top2Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.panelIndex ==2 && ~strcmp(x.type, '#DUMMY') && ~ismember('short-separation', x.flags), grommets)).posPanel);
 STLcoords.top2Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.panelIndex ==2 && ~strcmp(x.type, '#DUMMY'), grommets)).posPanel);
-STLcoords.top2ID  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).type);
+% STLcoords.top2ID  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).type);
+STLcoords.top2ID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).type};
 STLcoords.top2Rot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).rot);
 
 
@@ -66,6 +67,9 @@ STLcoords.top2Rot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~st
 % set chin strap holders at midpoint of given coordinates
 STLcoords.sideRightChStrap =  (sideOutlineR(end-IDXchStrapPoints(1),:)+sideOutlineR(end-IDXchStrapPoints(2),:))/2;
 STLcoords.sideLeftChStrap =  (sideOutlineL(end-IDXchStrapPoints(1),:)+sideOutlineL(end-IDXchStrapPoints(2),:))/2;
+
+STLcoords.sideRightChStrap_2 =  sideOutlineR(end-IDXchStrapPoints(1)+3,:);
+STLcoords.sideLeftChStrap_2 =  sideOutlineL(end-IDXchStrapPoints(1)+3,:);
 
 
 

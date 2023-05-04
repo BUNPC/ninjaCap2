@@ -43,5 +43,13 @@ hObject = handles.menuItemRegisterAtlasToHeadSize;
 % register atlas to head size
 AtlasViewerGUI('menuItemRegisterAtlasToDigpts_Callback', hObject, struct(), handles);
 
+atlasViewer.probe.optpos_reg = atlasViewer.probe.optpos_reg*target_circumference/61.3;
+atlasViewer.probe.srcpos = atlasViewer.probe.srcpos*target_circumference/61.3;
+atlasViewer.probe.detpos = atlasViewer.probe.detpos*target_circumference/61.3;
+if isfield(atlasViewer.probe,'dummypos')
+    atlasViewer.probe.dummypos = atlasViewer.probe.dummypos*target_circumference/61.3;
+end
+atlasViewer.probe.optpos = atlasViewer.probe.optpos*target_circumference/61.3;
+atlasViewer.probe.registration.sl(:,3) = atlasViewer.probe.registration.sl(:,3)*target_circumference/61.3;
 end
 

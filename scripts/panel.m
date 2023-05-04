@@ -2,14 +2,14 @@ function panel(atlasViewerFile, circumferenceDesired)
 
 %% Parameters
 debug = true;
-sWidth = 0.375;
+sWidth = 0.425;
 sExtensions = 1;
 %% Load head model
 % Use the view state (atlasViewer.mat).
 % fpath = 'D:\Office\Research\Software - Scripts\Matlab\ninjaCap\atlasViewer.mat';
 % load the AtlasViewer state file, including a head model and grommets
 [vHead, fHead, refpts, grommets, springList] = loadAtlasViewer(atlasViewerFile);
-
+    
 %% Get 3D seam points
 % segmentHead function generates 3D and 2D outline points for left, top and right panels.
 % But we use only 3D outline points since we are going to generate 2D outlines in a different way
@@ -209,21 +209,21 @@ if sExtensions == 1
            end
        end
     end
-    
-    if ~isempty(ext_lattice_left)
-       ext_left_poly = polybuffer(ext_lattice_left, 'lines', 1, 'JointType', 'square');
-       sideLeftPanel = union(sideLeftPanel,ext_left_poly );       
-    end
-    
-    if ~isempty(ext_lattice_right)
-       ext_right_poly = polybuffer(ext_lattice_right, 'lines', 1, 'JointType', 'square');
-       sideRightPanel = union(sideRightPanel,ext_right_poly );       
-    end
-    
-    if ~isempty(ext_lattice_top)
-       ext_top_poly = polybuffer(ext_lattice_top, 'lines', 1, 'JointType', 'square');
-       topPanel = union(topPanel,ext_top_poly );       
-    end
+% commenating these lines because extensions will be added in Blender    
+%     if ~isempty(ext_lattice_left)
+%        ext_left_poly = polybuffer(ext_lattice_left, 'lines', 1, 'JointType', 'square');
+%        sideLeftPanel = union(sideLeftPanel,ext_left_poly );       
+%     end
+%     
+%     if ~isempty(ext_lattice_right)
+%        ext_right_poly = polybuffer(ext_lattice_right, 'lines', 1, 'JointType', 'square');
+%        sideRightPanel = union(sideRightPanel,ext_right_poly );       
+%     end
+%     
+%     if ~isempty(ext_lattice_top)
+%        ext_top_poly = polybuffer(ext_lattice_top, 'lines', 1, 'JointType', 'square');
+%        topPanel = union(topPanel,ext_top_poly );       
+%     end
 end
 
 %% Make overlapping struts wider
@@ -231,15 +231,17 @@ left_overlap_lattice = [];
 for u = 1:size(C(2).eSeamExt,1)
     left_overlap_lattice = [left_overlap_lattice; [C(2).eSeamExt(u,1:2);C(2).eSeamExt(u,3:4)]; [NaN NaN]];
 end
-left_overlap_poly = polybuffer(left_overlap_lattice, 'lines', 1, 'JointType', 'square');
-sideLeftPanel  = union(sideLeftPanel,left_overlap_poly);
+% left_overlap_poly = polybuffer(left_overlap_lattice, 'lines', 1, 'JointType', 'square');
+% sideLeftPanel  = union(sideLeftPanel,left_overlap_poly);
+% sideLeftPanel  = subtract(sideLeftPanel,left_overlap_poly);
 
 right_overlap_lattice = [];
 for u = 1:size(C(3).eSeamExt,1)
     right_overlap_lattice = [right_overlap_lattice; [C(3).eSeamExt(u,1:2);C(3).eSeamExt(u,3:4)]; [NaN NaN]];
 end
-right_overlap_poly = polybuffer(right_overlap_lattice, 'lines', 1, 'JointType', 'square');
-sideRightPanel  = union(sideRightPanel,right_overlap_poly);
+% right_overlap_poly = polybuffer(right_overlap_lattice, 'lines', 1, 'JointType', 'square');
+% sideRightPanel  = union(sideRightPanel,right_overlap_poly);
+% sideRightPanel  = subtract(sideRightPanel,right_overlap_poly);
 
 top_overlap_lattice = [];
 for u = 1:size(C(2).eSeamExtRot,1)
@@ -249,8 +251,9 @@ end
 for u = 1:size(C(3).eSeamExtRot,1)
     top_overlap_lattice = [top_overlap_lattice; [C(3).eSeamExtRot(u,1:2);C(3).eSeamExtRot(u,3:4)]; [NaN NaN]];
 end
-top_overlap_poly = polybuffer(top_overlap_lattice, 'lines', 1, 'JointType', 'square');
-topPanel  = union(topPanel,top_overlap_poly);
+% top_overlap_poly = polybuffer(top_overlap_lattice, 'lines', 1, 'JointType', 'square');
+% topPanel  = union(topPanel,top_overlap_poly);
+% topPanel  = subtract(topPanel,top_overlap_poly);
 
 %% 
 
@@ -285,6 +288,32 @@ topOutline_side1 = [side1_ext1; topOutline_side1; side1_ext2];
 topOutline_side2 = [side2_ext1; topOutline_side2; side2_ext2];
 topOutline_lattice = [topOutline_side1; [NaN NaN]; topOutline_side2];
 topOutline_poly =  polybuffer(topOutline_lattice-min(topOutline,[],1), 'lines', 1, 'JointType', 'square');
+%%
+% Make just overlapping extensions for each side and remove them from each
+% side
+left_overlap_poly = polybuffer(left_overlap_lattice, 'lines', sWidth , 'JointType', 'square');
+ext_left_poly = polybuffer(ext_lattice_left, 'lines', sWidth , 'JointType', 'square');
+left_overlap_poly_ext =union(left_overlap_poly ,ext_left_poly);
+sideLeftPanel  = subtract(sideLeftPanel,left_overlap_poly_ext);
+left_overlap_poly = polybuffer(left_overlap_lattice, 'lines', sExtensions, 'JointType', 'square');
+ext_left_poly = polybuffer(ext_lattice_left, 'lines', sExtensions, 'JointType', 'square');
+left_overlap_poly_ext =union(left_overlap_poly ,ext_left_poly);
+
+right_overlap_poly = polybuffer(right_overlap_lattice, 'lines', sWidth , 'JointType', 'square');
+ext_right_poly = polybuffer(ext_lattice_right, 'lines', sWidth , 'JointType', 'square');
+right_overlap_poly_ext =union(right_overlap_poly ,ext_right_poly);
+sideRightPanel  = subtract(sideRightPanel,right_overlap_poly_ext);
+right_overlap_poly = polybuffer(right_overlap_lattice, 'lines', sExtensions, 'JointType', 'square');
+ext_right_poly = polybuffer(ext_lattice_right, 'lines', sExtensions, 'JointType', 'square');
+right_overlap_poly_ext =union(right_overlap_poly ,ext_right_poly);
+
+top_overlap_poly = polybuffer(top_overlap_lattice, 'lines', sWidth , 'JointType', 'square');
+ext_top_poly = polybuffer(ext_lattice_top, 'lines', sWidth , 'JointType', 'square');
+top_overlap_poly_ext =union(top_overlap_poly ,ext_top_poly);
+topPanel  = subtract(topPanel,top_overlap_poly_ext);
+top_overlap_poly = polybuffer(top_overlap_lattice, 'lines', sExtensions, 'JointType', 'square');
+ext_top_poly = polybuffer(ext_lattice_top, 'lines', sExtensions, 'JointType', 'square');
+top_overlap_poly_ext =union(top_overlap_poly ,ext_top_poly);
 
 %%
 
@@ -323,6 +352,8 @@ buffer = 5; % mm in overlap along boundaries
 topPanel = cut(topPanel, max_size, buffer);
 sideLeftPanel = cut(sideLeftPanel, max_size, buffer);
 sideRightPanel = cut(sideRightPanel, max_size, buffer);
+
+top_overlap_poly_ext = cut(top_overlap_poly_ext, max_size, buffer);
 
 
 %% Debug grommets
@@ -436,6 +467,27 @@ for i = 1:size(sideRightPanel, 1) % for each right side piece
     end
 end
 
+% save just left panel overlapping extensions
+nm = 'sideLeft-ext.stl';
+[f, v] = extrude(left_overlap_poly_ext, 0);
+TR = triangulation(f,v);
+stlwrite( TR,[stlfpath nm],'text');
+
+% save just right panel overlapping extensions
+nm = 'sideRight-ext.stl';
+[f, v] = extrude(right_overlap_poly_ext, 0);
+TR = triangulation(f,v);
+stlwrite( TR,[stlfpath nm],'text');
+
+% save just top panel overlapping extensions
+for i = 1:size(top_overlap_poly_ext, 1) 
+    nm = sprintf('top%d-ext.stl', i);
+    [f, v] = extrude(top_overlap_poly_ext(i), 0);
+    TR = triangulation(f,v);
+    stlwrite( TR,[stlfpath nm],'text');
+end
+
+
 %% If rotation values are string convert them to int. But this shouldn't happen, fix it in SDGui.
 for u = 1:length(grommets)
     if ischar(grommets(u).rot)
@@ -457,9 +509,12 @@ shifted_sideRightOutline = sideRightOutline-min(sideRightOutline,[],1);
 shifted_topOutline = topOutline-min(topOutline,[],1);
 [STLcoords] = getStlCoordinates(grommets, holders, aux, shifted_sideLeftOutline, shifted_sideRightOutline, sideLeftPanel, shifted_topOutline, sideOutsidePoints, IDXchStrapPoints);
 % add ear slit pos
-STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) -[10 10];
-STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) -[-10 10];
-
+% STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) -[10 10];
+% STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) -[-10 10];
+% STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) +[15 -25];
+% STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) +[-15 -25];
+STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) +[15 0];
+STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) +[-15 0];
 
 
 %%
