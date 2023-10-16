@@ -29,6 +29,17 @@ ind = find(isnan(sideRight3DVertices(:,1)) == 0);
 sideRight3DVertices = sideRight3DVertices(ind,:);
 top3DVertices = [flip(sideLeft3DVertices,1); sideRight3DVertices; sideLeft3DVertices(end,:)];
 topOutline_corner_idx = [1;size(sideLeft3DVertices,1);size(sideLeft3DVertices,1)+1;size(sideLeft3DVertices,1)+size(sideRight3DVertices,1)];
+
+% Find nearest point on the edge of the cap from Nz
+
+topEdgept1 = sideLeft3DVertices(1,:);
+topEdgept2 = sideRight3DVertices(1,:);
+Nz_idx = ismember(refpts.labels,'Nz');
+Nz_pos = refpts.pos(Nz_idx,:);
+nearest_edge_pt_to_Nz = nearest_pt_on_line_3D(topEdgept1,topEdgept2,Nz_pos);
+euclidean_dist = norm(nearest_edge_pt_to_Nz-Nz_pos);
+Z_dist = nearest_edge_pt_to_Nz(3)-Nz_pos(3);
+disp(['euclidean distance between Nz and cap edge is =' num2str(euclidean_dist) ' and Z-distance between Nz and cap edge is =' num2str(Z_dist)])
 %% Assign grommets to panels
 
 left_cutoff = max(max(sideLeft3DVertices(:,1)));
@@ -129,6 +140,9 @@ C = fillCapWithHexagons(sideLeftOutline, sideLeftIdx, sideRightOutline, sideRigh
 
 % get panel (poly shpaes) from outlinea and hexagonal connections
 [sideLeftPanel, sideRightPanel, topPanel] = getPanels(C, sWidth);
+
+% get mid x-point on topPanel 
+topPanel_midpoint_x = (min(topPanel.Vertices(:,1))+max(topPanel.Vertices(:,1)))/2;
 
 %% add marker grommet automatically. It is decided that it is best to add marker grommet while designing probe instead of adding automatically.
 % nGrommets = length(grommets);
@@ -355,6 +369,26 @@ sideRightPanel = cut(sideRightPanel, max_size, buffer);
 
 top_overlap_poly_ext = cut(top_overlap_poly_ext, max_size, buffer);
 
+% cut topPanel along sagittal direction
+xmin = 0;
+xmax = 0;
+ymin = 0;
+ymax = 0;
+for u = 1:size(topPanel,1)
+    for v = 1:size(topPanel,2)
+        if ~ isempty(topPanel(u,v).Vertices)
+            xmin = min(xmin,min(topPanel(u,v).Vertices(:,1)));
+            xmax = max(xmax,max(topPanel(u,v).Vertices(:,1)));
+            ymin = min(ymin,min(topPanel(u,v).Vertices(:,2)));
+            ymax = max(ymax,max(topPanel(u,v).Vertices(:,2)));
+        end
+    end
+end
+
+left_mask =  polyshape([xmin ymin; topPanel_midpoint_x ymin; topPanel_midpoint_x ymax; xmin ymax]);
+right_mask =  polyshape([ topPanel_midpoint_x ymin; xmax_x ymin; xmax ymax;  topPanel_midpoint_x ymax]);
+topPanel_left = intersect(left_mask, topPanel);
+topPanel_right = intersect(right_mask, topPanel);
 
 %% Debug grommets
 

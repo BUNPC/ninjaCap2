@@ -1,5 +1,6 @@
 function [sideOutline, grommets, topIdx, ear_slit_or_Cz_pos] = mapPanelandGrommets(grommets, springList, refpts, refpts_idx, panel3DVertices, refPts_neighbours, panel_name,outline_idx_to_include)
 
+make_video = false;
 % get points on outline seam that are closer to refPts
 panel3DVertices_01mm = getEquiDistPtsAlongOutline(panel3DVertices,0.1);
 refpts_outline = [];
@@ -231,12 +232,13 @@ end
 vHex2 = SpringRelax_func( vHex, eHex, hHex );
 
 pTopInt = [160 140];
-
-% ind = 1;
-% movieFileName = ['capMapping' panel_name '.mp4'];
-% figure(101)
-% vidfile = VideoWriter(movieFileName,'MPEG-4');
-% open(vidfile);
+if make_video
+    ind = 1;
+    movieFileName = ['capMapping' panel_name '.mp4'];
+    figure(101)
+    vidfile = VideoWriter(movieFileName,'MPEG-4');
+    open(vidfile);
+end
 
 for ii=1:2400
     vHex2 = SpringRelax_func( vHex2, eHex, hHex );
@@ -251,47 +253,48 @@ for ii=1:2400
     vec = vec ./ sum( vec.^2, 2).^0.5;
     vHex2(lst,1:2) = vHex2(lst,1:2) + 0.1 * vec;
 %     figure; plot3(vHex2(:,1),vHex2(:,2),vHex2(:,3),'.'); axis equal
-    
-%     if ii == 1 || rem(ii,10) == 0
-%         %% make movie
-%         eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
-%         dLen = eHexLen-hHex;
-%     %     plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
-%         
-%         plot3( vHex2(1:gIdx,1), vHex2(1:gIdx,2), vHex2(1:gIdx,3), 'k.');
-%         hold on
-%         plot3( vHex2(sIdx,1), vHex2(sIdx,2), vHex2(sIdx,3), 'r.', 'MarkerSize',12);
-%         hold on
-%         plot3( vHex2(dIdx,1), vHex2(dIdx,2), vHex2(dIdx,3), 'b.', 'MarkerSize',12);
-%     %     for u = 1:ref_elength
-%     %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','b','LineWidth',0.5)
-%     %     end
-%     %     for u = ref_elength+1:size(eHex,1)
-%     %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','g','LineWidth',0.5)
-%     %     end
-%         for u = 1:ref_elength
-%             hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
-%             if dLen(u)>3
-%                 set(hl,'color','r');
-%             elseif dLen(u)<-3
-%                 set(hl,'color','c');
-%             end
-%         end
-%         for u =  ref_elength+1:size(eHex,1)
-%             hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
-%             if dLen(u)>3
-%                 set(hl,'color','r');
-%             elseif dLen(u)<-3
-%                 set(hl,'color','c');
-%             end
-%         end
-%         hold off
-%         axis equal
-%         drawnow
-%         F = getframe(gcf);
-%         writeVideo(vidfile,F);
-%         ind = ind+1;
-%     end
+    if make_video
+        if ii == 1 || rem(ii,10) == 0
+            %% make movie
+            eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
+            dLen = eHexLen-hHex;
+        %     plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
+
+            plot3( vHex2(1:gIdx,1), vHex2(1:gIdx,2), vHex2(1:gIdx,3), 'k.');
+            hold on
+            plot3( vHex2(sIdx,1), vHex2(sIdx,2), vHex2(sIdx,3), 'r.', 'MarkerSize',12);
+            hold on
+            plot3( vHex2(dIdx,1), vHex2(dIdx,2), vHex2(dIdx,3), 'b.', 'MarkerSize',12);
+        %     for u = 1:ref_elength
+        %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','b','LineWidth',0.5)
+        %     end
+        %     for u = ref_elength+1:size(eHex,1)
+        %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','g','LineWidth',0.5)
+        %     end
+            for u = 1:ref_elength
+                hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
+                if dLen(u)>3
+                    set(hl,'color','r');
+                elseif dLen(u)<-3
+                    set(hl,'color','c');
+                end
+            end
+            for u =  ref_elength+1:size(eHex,1)
+                hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
+                if dLen(u)>3
+                    set(hl,'color','r');
+                elseif dLen(u)<-3
+                    set(hl,'color','c');
+                end
+            end
+            hold off
+            axis equal
+            drawnow
+            F = getframe(gcf);
+            writeVideo(vidfile,F);
+            ind = ind+1;
+        end
+    end
 end
 
 for ii=1:1800
@@ -299,49 +302,52 @@ for ii=1:1800
     
     lst = find(abs(vHex2(:,3))>0.1);
     vHex2(lst,3) = vHex2(lst,3) - sign(vHex2(lst,3))*0.1;
-    
-%     if ii == 1 || rem(ii,10) == 0
-%         %% make movie
-%         eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
-%         dLen = eHexLen-hHex;
-%     %     plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
-%         
-%         plot3( vHex2(1:gIdx,1), vHex2(1:gIdx,2), vHex2(1:gIdx,3), 'k.');
-%         hold on
-%         plot3( vHex2(sIdx,1), vHex2(sIdx,2), vHex2(sIdx,3), 'r.', 'MarkerSize',12);
-%         hold on
-%         plot3( vHex2(dIdx,1), vHex2(dIdx,2), vHex2(dIdx,3), 'b.', 'MarkerSize',12);
-%     %     for u = 1:ref_elength
-%     %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','b','LineWidth',0.5)
-%     %     end
-%     %     for u = ref_elength+1:size(eHex,1)
-%     %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','g','LineWidth',0.5)
-%     %     end
-%         for u = 1:ref_elength
-%             hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
-%             if dLen(u)>3
-%                 set(hl,'color','r');
-%             elseif dLen(u)<-3
-%                 set(hl,'color','c');
-%             end
-%         end
-%         for u =  ref_elength+1:size(eHex,1)
-%             hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
-%             if dLen(u)>3
-%                 set(hl,'color','r');
-%             elseif dLen(u)<-3
-%                 set(hl,'color','c');
-%             end
-%         end
-%         hold off
-%         axis equal
-%         drawnow
-%         F = getframe(gcf);
-%         writeVideo(vidfile,F);
-%         ind = ind+1;
-%     end
+    if make_video
+        if ii == 1 || rem(ii,10) == 0
+            %% make movie
+            eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
+            dLen = eHexLen-hHex;
+        %     plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
+
+            plot3( vHex2(1:gIdx,1), vHex2(1:gIdx,2), vHex2(1:gIdx,3), 'k.');
+            hold on
+            plot3( vHex2(sIdx,1), vHex2(sIdx,2), vHex2(sIdx,3), 'r.', 'MarkerSize',12);
+            hold on
+            plot3( vHex2(dIdx,1), vHex2(dIdx,2), vHex2(dIdx,3), 'b.', 'MarkerSize',12);
+        %     for u = 1:ref_elength
+        %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','b','LineWidth',0.5)
+        %     end
+        %     for u = ref_elength+1:size(eHex,1)
+        %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','g','LineWidth',0.5)
+        %     end
+            for u = 1:ref_elength
+                hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
+                if dLen(u)>3
+                    set(hl,'color','r');
+                elseif dLen(u)<-3
+                    set(hl,'color','c');
+                end
+            end
+            for u =  ref_elength+1:size(eHex,1)
+                hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
+                if dLen(u)>3
+                    set(hl,'color','r');
+                elseif dLen(u)<-3
+                    set(hl,'color','c');
+                end
+            end
+            hold off
+            axis equal
+            drawnow
+            F = getframe(gcf);
+            writeVideo(vidfile,F);
+            ind = ind+1;
+        end
+    end
 end
-% close(vidfile)
+if make_video
+    close(vidfile)
+end
 
 eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
 mean( (eHexLen-hHex).^2 ).^0.5;
