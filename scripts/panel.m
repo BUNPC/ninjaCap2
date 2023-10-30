@@ -385,11 +385,34 @@ for u = 1:size(topPanel,1)
     end
 end
 
-left_mask =  polyshape([xmin ymin; topPanel_midpoint_x ymin; topPanel_midpoint_x ymax; xmin ymax]);
-right_mask =  polyshape([ topPanel_midpoint_x ymin; xmax_x ymin; xmax ymax;  topPanel_midpoint_x ymax]);
-topPanel_left = intersect(left_mask, topPanel);
-topPanel_right = intersect(right_mask, topPanel);
+for u = 1:size(top_overlap_poly_ext ,1)
+    for v = 1:size(top_overlap_poly_ext ,2)
+        if ~ isempty(top_overlap_poly_ext (u,v).Vertices)
+            xmin = min(xmin,min(top_overlap_poly_ext (u,v).Vertices(:,1)));
+            xmax = max(xmax,max(top_overlap_poly_ext (u,v).Vertices(:,1)));
+            ymin = min(ymin,min(top_overlap_poly_ext (u,v).Vertices(:,2)));
+            ymax = max(ymax,max(top_overlap_poly_ext (u,v).Vertices(:,2)));
+        end
+    end
+end
 
+xmin = xmin-5;
+xmax = xmax+5;
+ymin = ymin-5;
+ymax = ymax+5;
+
+% left_mask =  polyshape([xmin ymin; topPanel_midpoint_x ymin; topPanel_midpoint_x ymax; xmin ymax]);
+% right_mask =  polyshape([ topPanel_midpoint_x ymin; xmax ymin; xmax ymax;  topPanel_midpoint_x ymax]);
+% topPanel_left = intersect(left_mask, topPanel);
+% topPanel_right = intersect(right_mask, topPanel);
+% 
+% top_overlap_poly_ext_left = intersect(left_mask, top_overlap_poly_ext);
+% top_overlap_poly_ext_right = intersect(right_mask,top_overlap_poly_ext);
+% top_overlap_poly_ext = [top_overlap_poly_ext_left; top_overlap_poly_ext_right];
+% 
+% % add seam to top peices
+% [topPanel_left, topPanel_right] = add_seams_toppanel(topPanel_left, topPanel_right,topPanel_midpoint_x);
+% topPanel = [topPanel_left; topPanel_right];
 %% Debug grommets
 
 if debug
