@@ -49,6 +49,12 @@ STLcoords.top2Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.pa
 % STLcoords.top2ID  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).type);
 STLcoords.top2ID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).type};
 STLcoords.top2Rot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==2, grommets)).rot);
+STLcoords.top3Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.panelIndex ==3 && ~strcmp(x.type, '#DUMMY'), grommets)).posPanel);
+STLcoords.top3ID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==3, grommets)).type};
+STLcoords.top3Rot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==3, grommets)).rot);
+STLcoords.top4Pos = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && x.panelIndex ==4 && ~strcmp(x.type, '#DUMMY'), grommets)).posPanel);
+STLcoords.top4ID  = {grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==4, grommets)).type};
+STLcoords.top4Rot  = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#DUMMY') && x.panelIndex ==4, grommets)).rot);
 
 
 

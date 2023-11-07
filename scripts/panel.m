@@ -359,7 +359,7 @@ topPanel_temp = cut(topPanel, max_size, buffer);
 sideLeftPanel_temp = cut(sideLeftPanel, max_size, buffer);
 sideRightPanel_temp = cut(sideRightPanel, max_size, buffer);
 
-grommets = cutGrommets(grommets, topPanel_temp, sideLeftPanel_temp, sideRightPanel_temp);
+% grommets = cutGrommets(grommets, topPanel_temp, sideLeftPanel_temp, sideRightPanel_temp);
 
 buffer = 5; % mm in overlap along boundaries
 
@@ -385,11 +385,29 @@ for u = 1:size(topPanel,1)
     end
 end
 
+for u = 1:size(top_overlap_poly_ext,1)
+    for v = 1:size(top_overlap_poly_ext,2)
+        if ~ isempty(top_overlap_poly_ext(u,v).Vertices)
+            xmin = min(xmin,min(top_overlap_poly_ext(u,v).Vertices(:,1)));
+            xmax = max(xmax,max(top_overlap_poly_ext(u,v).Vertices(:,1)));
+            ymin = min(ymin,min(top_overlap_poly_ext(u,v).Vertices(:,2)));
+            ymax = max(ymax,max(top_overlap_poly_ext(u,v).Vertices(:,2)));
+        end
+    end
+end
+
 left_mask =  polyshape([xmin ymin; topPanel_midpoint_x ymin; topPanel_midpoint_x ymax; xmin ymax]);
-right_mask =  polyshape([ topPanel_midpoint_x ymin; xmax_x ymin; xmax ymax;  topPanel_midpoint_x ymax]);
+right_mask =  polyshape([ topPanel_midpoint_x ymin; xmax ymin; xmax ymax;  topPanel_midpoint_x ymax]);
 topPanel_left = intersect(left_mask, topPanel);
 topPanel_right = intersect(right_mask, topPanel);
+[topPanel_left, topPanel_right, topLoopPos] = add_seams_toppanel(topPanel_left, topPanel_right,topPanel_midpoint_x);
+topPanel = [topPanel_left; topPanel_right];
 
+grommets = cutGrommets(grommets, topPanel, sideLeftPanel, sideRightPanel);
+
+top_overlap_poly_ext_left = intersect(left_mask, top_overlap_poly_ext);
+top_overlap_poly_ext_right = intersect(right_mask, top_overlap_poly_ext);
+top_overlap_poly_ext = [top_overlap_poly_ext_left; top_overlap_poly_ext_right];
 %% Debug grommets
 
 if debug
@@ -549,6 +567,10 @@ shifted_topOutline = topOutline-min(topOutline,[],1);
 % STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) +[-15 -25];
 STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) +[15 0];
 STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) +[-15 0];
+for u =1:length(topLoopPos)
+    field_name = strcat('top',num2str(u),'LoopPos');
+    STLcoords.(field_name) = topLoopPos{u};
+end
 
 
 %%
