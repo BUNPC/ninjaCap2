@@ -91,13 +91,13 @@ system('wrkspace.blend')
 
 stl_files = dir(['print' filesep '*.stl']);
 for u = 1:length(stl_files)
-    TR = stlread([stl_files(1).folder filesep stl_files(1).name]);
+    TR = stlread([stl_files(u).folder filesep stl_files(u).name]);
     v = TR.Points;
     idx = find(v(:,3) < 0);
     v(idx,3) = 0;
     f = TR.ConnectivityList;
     TR = triangulation(f,v);
-    stlwrite( TR,[stl_files(1).folder filesep stl_files(1).name],'text');
+    stlwrite( TR,[stl_files(u).folder filesep stl_files(u).name],'text');
 end
 
 %% COPY BLENDER OUTPUT TO WORKING DIRECTORY
