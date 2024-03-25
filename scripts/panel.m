@@ -72,14 +72,14 @@ springList(spring_dummy_idx,:) = [];
 
 right_cutoff = min(sideRight3DVertices(:,1));
 refpts_sideRight_idx = find(refpts.pos(:,1) >= right_cutoff);
-[sideRightOutline, grommets, ~, rightEarSlit] = mapPanelandGrommets(grommets, springList, refpts, refpts_sideRight_idx, sideRight3DVertices, rightSide_refPts_neighbours, 'sideRight');
+[sideRightOutline, grommets, ~, rightEarSlit] = mapPanelandGrommets(vHead, fHead, grommets, springList, refpts, refpts_sideRight_idx, sideRight3DVertices, rightSide_refPts_neighbours, 'sideRight');
 
 left_cutoff = min(sideLeft3DVertices(:,1));
 refpts_sideLeft_idx = find(refpts.pos(:,1) <= left_cutoff);
-[sideLeftOutline, grommets, ~, leftEarSlit] = mapPanelandGrommets(grommets, springList, refpts, refpts_sideLeft_idx, sideLeft3DVertices, leftSide_refPts_neighbours, 'sideLeft');
+[sideLeftOutline, grommets, ~, leftEarSlit] = mapPanelandGrommets(vHead, fHead, grommets, springList, refpts, refpts_sideLeft_idx, sideLeft3DVertices, leftSide_refPts_neighbours, 'sideLeft');
 
 refpts_top_idx = find(refpts.pos(:,1) > left_cutoff & refpts.pos(:,1) < right_cutoff);
-[topOutline, grommets, topIdx, Cz_pos] = mapPanelandGrommets(grommets, springList, refpts, refpts_top_idx, top3DVertices, top_refPts_neighbours, 'top',topOutline_corner_idx);
+[topOutline, grommets, topIdx, Cz_pos] = mapPanelandGrommets(vHead, fHead, grommets, springList, refpts, refpts_top_idx, top3DVertices, top_refPts_neighbours, 'top',topOutline_corner_idx);
 
 %% Add the side piece to side panels
 
@@ -137,6 +137,118 @@ axis equal
 %%
 % fill cap with hexagons
 C = fillCapWithHexagons(sideLeftOutline, sideLeftIdx, sideRightOutline, sideRightIdx, topOutline, topIdx);
+
+%%
+%make graph for hexagonal structure and grommets
+outlines_min = [min(topOutline(:,1)) min(topOutline(:,2)); min(sideLeftOutline(:,1)) min(sideLeftOutline(:,2)); min(sideRightOutline(:,1)) min(sideRightOutline(:,2))];
+% top_panel_graph.vertices = [C(1).v; C(1).vOut];
+% top_panel_graph.edges = [C(1).e; C(1).eOut+size(C(1).v,1)];
+top_panel_graph.vertices = [C(1).v];
+top_panel_graph.edges = [C(1).e];
+nVertices = size(top_panel_graph.vertices,1);
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#NONE'), grommets)).posPanel)-[outlines_min(1,1) outlines_min(1,2)];
+
+for u = 1:size(a,1)
+    g_pos = a(u,:);
+    v_dist = sum(sqrt((top_panel_graph.vertices-g_pos).^2),2);
+    [v_dist,sidx] = sort(v_dist);
+    top_panel_graph.edges(end+1:end+4,:) = [nVertices+u sidx(1); nVertices+u sidx(2); ...
+                                                nVertices+u sidx(3); nVertices+u sidx(4)];
+end
+top_panel_graph.vertices = [top_panel_graph.vertices; a];
+
+% left_panel_graph.vertices = [C(2).v; C(2).vOut];
+% left_panel_graph.edges = [C(2).e; C(2).eOut+size(C(2).v,1)];
+left_panel_graph.vertices = [C(2).v];
+left_panel_graph.edges = [C(2).e];
+nVertices = size(left_panel_graph.vertices,1);
+left_vout_idx = [nVertices+1:nVertices+size(C(2).eSeamExt,1)]';
+for u = 1:size(C(2).eSeamExt,1)
+    temp_pt = [C(2).eSeamExt(u,1) C(2).eSeamExt(u,2)];
+    v_idx = find(ismember(left_panel_graph.vertices,temp_pt,'rows')==1);
+    left_panel_graph.vertices = [left_panel_graph.vertices; [C(2).eSeamExt(u,3) C(2).eSeamExt(u,4)]];
+    nVertices = nVertices+1;
+    left_panel_graph.edges = [left_panel_graph.edges; [v_idx nVertices]];
+end
+
+
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#NONE'), grommets)).posPanel)-[outlines_min(2,1) outlines_min(2,2)];
+for u = 1:size(a,1)
+    g_pos = a(u,:);
+    v_dist = sum(sqrt((left_panel_graph.vertices-g_pos).^2),2);
+    [v_dist,sidx] = sort(v_dist);
+    left_panel_graph.edges(end+1:end+4,:) = [nVertices+u sidx(1); nVertices+u sidx(2); ...
+                                                nVertices+u sidx(3); nVertices+u sidx(4)];
+end
+left_panel_graph.vertices = [left_panel_graph.vertices; a];
+
+% right_panel_graph.vertices = [C(3).v; C(3).vOut];
+% right_panel_graph.edges = [C(3).e; C(3).eOut+size(C(3).v,1)];
+right_panel_graph.vertices = [C(3).v];
+right_panel_graph.edges = [C(3).e];
+nVertices = size(right_panel_graph.vertices,1);
+right_vout_idx = [nVertices+1:nVertices+size(C(3).eSeamExt,1)]';
+for u = 1:size(C(3).eSeamExt,1)
+    temp_pt = [C(3).eSeamExt(u,1) C(3).eSeamExt(u,2)];
+    v_idx = find(ismember(right_panel_graph.vertices,temp_pt,'rows')==1);
+    right_panel_graph.vertices = [right_panel_graph.vertices; [C(3).eSeamExt(u,3) C(3).eSeamExt(u,4)]];
+    nVertices = nVertices+1;
+    right_panel_graph.edges = [right_panel_graph.edges; [v_idx nVertices]];
+end
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#NONE'), grommets)).posPanel)-[outlines_min(3,1) outlines_min(3,2)];
+
+for u = 1:size(a,1)
+    g_pos = a(u,:);
+    v_dist = sum(sqrt((right_panel_graph.vertices-g_pos).^2),2);
+    [v_dist,sidx] = sort(v_dist);
+    right_panel_graph.edges(end+1:end+4,:) = [nVertices+u sidx(1); nVertices+u sidx(2); ...
+                                                nVertices+u sidx(3); nVertices+u sidx(4)];
+end
+right_panel_graph.vertices = [right_panel_graph.vertices; a];
+
+% save('panel_graphs.mat','top_panel_graph','left_panel_graph','right_panel_graph');
+
+% combine to make one graph
+whole_cap.vertices = [left_panel_graph.vertices; right_panel_graph.vertices; top_panel_graph.vertices];
+whole_cap.edges = [left_panel_graph.edges];
+nleftVertices = size(left_panel_graph.vertices,1);
+whole_cap.edges = [whole_cap.edges; right_panel_graph.edges+nleftVertices];
+nrighttVertices = size(right_panel_graph.vertices,1);
+whole_cap.edges = [whole_cap.edges; top_panel_graph.edges+nleftVertices+nrighttVertices];
+right_vout_idx = right_vout_idx+nleftVertices;
+nedges = size(whole_cap.edges,1);
+for u = 1:length(C(2).eExtensionsTop)
+    temp_pt = [C(2).eExtensionsTop(u).pts(1) C(2).eExtensionsTop(u).pts(2)];
+    v_idx = find(ismember(whole_cap.vertices,temp_pt,'rows'));
+    whole_cap.edges = [whole_cap.edges; v_idx left_vout_idx(u)];
+end
+
+for u = 1:length(C(3).eExtensionsTop)
+    temp_pt = [C(3).eExtensionsTop(u).pts(1) C(3).eExtensionsTop(u).pts(2)];
+    v_idx = find(ismember(whole_cap.vertices,temp_pt,'rows'));
+    whole_cap.edges = [whole_cap.edges; v_idx right_vout_idx(u)];
+end
+
+zero_dist_edges = [nedges+1:nedges+length(C(2).eExtensionsTop)+length(C(3).eExtensionsTop)]';
+
+save('panel_graphs.mat','top_panel_graph','left_panel_graph','right_panel_graph','whole_cap','zero_dist_edges','nleftVertices','nrighttVertices');
+
+%%
+hHex = zeros(size(whole_cap.edges,1),1);
+for u = 1:length(hHex)-length(zero_dist_edges)
+    hHex(u) = norm(whole_cap.vertices(whole_cap.edges(u,1),:)-whole_cap.vertices(whole_cap.edges(u,2),:));
+end
+hHex(length(hHex)-length(zero_dist_edges)+1:end) = 0.01;
+%%
+vInit = vertices;
+vInit(:,3) = 0.1*rand(size(vInit,1),1);
+vHex = vInit;
+% for u=1:1000
+    u
+    
+    vHex = SpringRelax_func(vHex, whole_cap.edges, hHex );
+% end
+%%
 
 % get panel (poly shpaes) from outlinea and hexagonal connections
 [sideLeftPanel, sideRightPanel, topPanel] = getPanels(C, sWidth);

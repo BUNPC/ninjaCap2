@@ -1,6 +1,7 @@
-function [sideOutline, grommets, topIdx, ear_slit_or_Cz_pos] = mapPanelandGrommets(grommets, springList, refpts, refpts_idx, panel3DVertices, refPts_neighbours, panel_name,outline_idx_to_include)
+function [sideOutline, grommets, topIdx, ear_slit_or_Cz_pos] = mapPanelandGrommets(vHead, fHead,grommets, springList, refpts, refpts_idx, panel3DVertices, refPts_neighbours, panel_name,outline_idx_to_include)
 
-make_video = false;
+make_video =false;
+
 % get points on outline seam that are closer to refPts
 panel3DVertices_01mm = getEquiDistPtsAlongOutline(panel3DVertices,0.1);
 refpts_outline = [];
@@ -24,7 +25,7 @@ outline_refpts_idx = outline_refpts_idx(ia);
 
 % If outline_idx_to_include parameter is passed then add those points to seam outline
 % points. Here we used it to include corner points on top seam outline
-if nargin > 7
+if nargin > 9
     [outline_refpts_idx, sort_idx] = sort(outline_refpts_idx);
     refpts_outline = refpts_outline(sort_idx,:);
     refpts_outline_label = refpts_outline_label(sort_idx);
@@ -219,25 +220,47 @@ max_h = max(vHex(:,2));
 %     max_x = max(vHex(:,1));
 %     vHex(:,1) = -(vHex(:,1)-max_x);
 % end
-% get distnace between connections.
-hHex  = sqrt(sum((vHex(eHex(:,1),:)-vHex(eHex(:,2),:)).^2,2));
 
-zero_dist_idx = find(hHex == 0);
-if ~isempty(zero_dist_idx)
-    hHex(zero_dist_idx) = 0.5;
-end
+% get euclidean distnace between connections.
+hHex_temp  = sqrt(sum((vHex(eHex(:,1),:)-vHex(eHex(:,2),:)).^2,2));
+hHex = hHex_temp;
+
+% % get deodesic distnaces between connections
+% hHex = getGeodesicdist(vHead, fHead, vHex, eHex);
+% 
+% hHex_diff = hHex-hHex_temp;
+% nidx = find(hHex_diff < 0);
+% hHex(nidx) = hHex_temp(nidx);
+% gidx = find(hHex_diff >= 4);
+% hHex(gidx) = hHex_temp(gidx);
+% zero_dist_idx = find(hHex == 0);
+% if ~isempty(zero_dist_idx)
+%     hHex(zero_dist_idx) = 0.5;
+% end
+
+% save(['deform_correction_results_sDist' filesep 'sDist_' panel_name '.mat'],'hHex');
+
+% load(['deform_correction_results_sDist' filesep 'sDist_' panel_name '.mat'])
  
 % run spring relaxation and push cap to 2D plane
 
 vHex2 = SpringRelax_func( vHex, eHex, hHex );
 
 pTopInt = [160 140];
-if make_video
+if 1
     ind = 1;
     movieFileName = ['capMapping' panel_name '.mp4'];
     figure(101)
     vidfile = VideoWriter(movieFileName,'MPEG-4');
     open(vidfile);
+    
+    custom_colormap = zeros(31,3);
+    temp = linspace(1,0,16);
+    custom_colormap(1:15,1) = temp(1:15); 
+    custom_colormap(2:16,2) = flip(temp(1:15)); 
+    custom_colormap(17:end,3) = flip(temp(1:15)); 
+    custom_colormap(17:end,2) = temp(2:16); 
+    color_var = linspace(-0.5,0.5,31);
 end
 
 for ii=1:2400
@@ -273,22 +296,27 @@ for ii=1:2400
         %     end
             for u = 1:ref_elength
                 hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
-                if dLen(u)>3
-                    set(hl,'color','r');
-                elseif dLen(u)<-3
-                    set(hl,'color','c');
-                end
+                [~,color_idx] = min(abs(color_var-dLen(u)));
+                set(hl,'color',custom_colormap(color_idx,:));
+%                 if dLen(u)>3
+%                     set(hl,'color','r');
+%                 elseif dLen(u)<-3
+%                     set(hl,'color','c');
+%                 end
             end
             for u =  ref_elength+1:size(eHex,1)
                 hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
-                if dLen(u)>3
-                    set(hl,'color','r');
-                elseif dLen(u)<-3
-                    set(hl,'color','c');
-                end
+                [~,color_idx] = min(abs(color_var-dLen(u)));
+                set(hl,'color',custom_colormap(color_idx,:));
+%                 if dLen(u)>3
+%                     set(hl,'color','r');
+%                 elseif dLen(u)<-3
+%                     set(hl,'color','c');
+%                 end
             end
             hold off
             axis equal
+%             colorbar;
             drawnow
             F = getframe(gcf);
             writeVideo(vidfile,F);
@@ -296,55 +324,80 @@ for ii=1:2400
         end
     end
 end
+% if ~strcmp(panel_name,'top')
+loop_count  = 1;
+continue_loop = true;
+while (continue_loop)
+    if loop_count == 1
+        hHex_outline_adjust = hHex;
+    end
+    for ii=1:1800
+        vHex2 = SpringRelax_func( vHex2, eHex, hHex_outline_adjust );
 
-for ii=1:1800
-    vHex2 = SpringRelax_func( vHex2, eHex, hHex );
-    
-    lst = find(abs(vHex2(:,3))>0.1);
-    vHex2(lst,3) = vHex2(lst,3) - sign(vHex2(lst,3))*0.1;
-    if make_video
-        if ii == 1 || rem(ii,10) == 0
-            %% make movie
-            eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
-            dLen = eHexLen-hHex;
-        %     plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
+        lst = find(abs(vHex2(:,3))>0.1);
+        vHex2(lst,3) = vHex2(lst,3) - sign(vHex2(lst,3))*0.1;
+        if ii == 1800 
+            if ii == 1 || rem(ii,10) == 0
+                %% make movie
+                eHexLen = sum((vHex2(eHex(:,1),:)-vHex2(eHex(:,2),:)).^2,2).^0.5;
+                dLen = eHexLen-hHex;
+            %     plot3( vHex(:,1), vHex(:,2), vHex(:,3), 'k.');
 
-            plot3( vHex2(1:gIdx,1), vHex2(1:gIdx,2), vHex2(1:gIdx,3), 'k.');
-            hold on
-            plot3( vHex2(sIdx,1), vHex2(sIdx,2), vHex2(sIdx,3), 'r.', 'MarkerSize',12);
-            hold on
-            plot3( vHex2(dIdx,1), vHex2(dIdx,2), vHex2(dIdx,3), 'b.', 'MarkerSize',12);
-        %     for u = 1:ref_elength
-        %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','b','LineWidth',0.5)
-        %     end
-        %     for u = ref_elength+1:size(eHex,1)
-        %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','g','LineWidth',0.5)
-        %     end
-            for u = 1:ref_elength
-                hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
-                if dLen(u)>3
-                    set(hl,'color','r');
-                elseif dLen(u)<-3
-                    set(hl,'color','c');
+                plot3( vHex2(1:gIdx,1), vHex2(1:gIdx,2), vHex2(1:gIdx,3), 'k.');
+                hold on
+                plot3( vHex2(sIdx,1), vHex2(sIdx,2), vHex2(sIdx,3), 'r.', 'MarkerSize',12);
+                hold on
+                plot3( vHex2(dIdx,1), vHex2(dIdx,2), vHex2(dIdx,3), 'b.', 'MarkerSize',12);
+            %     for u = 1:ref_elength
+            %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','b','LineWidth',0.5)
+            %     end
+            %     for u = ref_elength+1:size(eHex,1)
+            %         line([vHex(eHex(u,1),1) vHex(eHex(u,2),1)], [vHex(eHex(u,1),2) vHex(eHex(u,2),2)], [vHex(eHex(u,1),3) vHex(eHex(u,2),3)],'color','g','LineWidth',0.5)
+            %     end
+                for u = 1:ref_elength
+                    hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[255 255 102]/255.0,'LineWidth',0.5);
+                    [~,color_idx] = min(abs(color_var-dLen(u)));
+                    set(hl,'color',custom_colormap(color_idx,:));
+    %                 if dLen(u)>3
+    %                     set(hl,'color','r');
+    %                 elseif dLen(u)<-3
+    %                     set(hl,'color','c');
+    %                 end
+                end
+                for u =  ref_elength+1:size(eHex,1)
+                    hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
+                    [~,color_idx] = min(abs(color_var-dLen(u)));
+                    set(hl,'color',custom_colormap(color_idx,:));
+    %                 if dLen(u)>3
+    %                     set(hl,'color','r');
+    %                 elseif dLen(u)<-3
+    %                     set(hl,'color','c');
+    %                 end
+                end
+                hold off
+                axis equal
+    %             colorbar;
+                drawnow
+%                 saveas(gcf,['deform_correction_results_sDist' filesep 'final_frame' panel_name '_' num2str(loop_count) '.fig'])
+                F = getframe(gcf);
+                writeVideo(vidfile,F);
+                ind = ind+1;
+%                 save(['deform_correction_results_sDist' filesep 'error_info_' panel_name '_' num2str(loop_count) '.mat'],'vHex2','eHex','hHex','eHexLen','vHex_outline_idx');
+                if 0 %strcmp(panel_name,'top')
+                    continue_loop = false;
+                else
+                [ans,hHex_outline_adjust] = repeat_loop(vHex2,eHex,hHex,hHex_outline_adjust,eHexLen,vHex_outline_idx);
+                if ~ans || loop_count > 5
+                    continue_loop = false; 
+                end
+                loop_count = loop_count+1;
                 end
             end
-            for u =  ref_elength+1:size(eHex,1)
-                hl=line([vHex2(eHex(u,1),1) vHex2(eHex(u,2),1)], [vHex2(eHex(u,1),2) vHex2(eHex(u,2),2)], [vHex2(eHex(u,1),3) vHex2(eHex(u,2),3)],'color',[102 255 102]/255.0,'LineWidth',0.5);
-                if dLen(u)>3
-                    set(hl,'color','r');
-                elseif dLen(u)<-3
-                    set(hl,'color','c');
-                end
-            end
-            hold off
-            axis equal
-            drawnow
-            F = getframe(gcf);
-            writeVideo(vidfile,F);
-            ind = ind+1;
         end
     end
 end
+% end
+
 if make_video
     close(vidfile)
 end
@@ -427,5 +480,8 @@ axis equal
 for u = 1:length(gvOrder)
     grommets(gvOrder(u)).posPanel = vHex2(vHex_grommets_idx(u),1:2);
 end
+
+
+
 
 
