@@ -51,6 +51,7 @@ end
 avMainFilepath = which('AtlasViewerGUI.m');
 avAppDir = fileparts(avMainFilepath);
 avDataDir = filesepStandard([avAppDir, '/Data/Colin']);
+%avDataDir = filesepStandard('C:\Users\Sreekanth\Documents\Projects\fNIRS\caps\test_new_head_model_2');
 % avDataDir = [avAppDir filesep 'Data' filesep 'Colin'];
 AtlasViewerGUI(pwd, avDataDir, 'userargs');
 

@@ -147,6 +147,7 @@ top_panel_graph.vertices = [C(1).v];
 top_panel_graph.edges = [C(1).e];
 nVertices = size(top_panel_graph.vertices,1);
 a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#NONE'), grommets)).posPanel)-[outlines_min(1,1) outlines_min(1,2)];
+top_refpts_idx = [nVertices+1:nVertices+size(a,1)]';
 
 for u = 1:size(a,1)
     g_pos = a(u,:);
@@ -181,6 +182,7 @@ for u = 1:size(a,1)
                                                 nVertices+u sidx(3); nVertices+u sidx(4)];
 end
 left_panel_graph.vertices = [left_panel_graph.vertices; a];
+left_refpts_idx = [nVertices+1:nVertices+size(a,1)]';
 
 % right_panel_graph.vertices = [C(3).v; C(3).vOut];
 % right_panel_graph.edges = [C(3).e; C(3).eOut+size(C(3).v,1)];
@@ -205,6 +207,7 @@ for u = 1:size(a,1)
                                                 nVertices+u sidx(3); nVertices+u sidx(4)];
 end
 right_panel_graph.vertices = [right_panel_graph.vertices; a];
+right_refpts_idx = [nVertices+1:nVertices+size(a,1)]';
 
 % save('panel_graphs.mat','top_panel_graph','left_panel_graph','right_panel_graph');
 
@@ -230,8 +233,9 @@ for u = 1:length(C(3).eExtensionsTop)
 end
 
 zero_dist_edges = [nedges+1:nedges+length(C(2).eExtensionsTop)+length(C(3).eExtensionsTop)]';
+refpts_idx = [left_refpts_idx; right_refpts_idx+nleftVertices; top_refpts_idx+nleftVertices+nrighttVertices];
 
-save('panel_graphs.mat','top_panel_graph','left_panel_graph','right_panel_graph','whole_cap','zero_dist_edges','nleftVertices','nrighttVertices');
+% save('panel_graphs.mat','top_panel_graph','left_panel_graph','right_panel_graph','whole_cap','zero_dist_edges','nleftVertices','nrighttVertices','refpts_idx');
 
 %%
 hHex = zeros(size(whole_cap.edges,1),1);
@@ -239,15 +243,6 @@ for u = 1:length(hHex)-length(zero_dist_edges)
     hHex(u) = norm(whole_cap.vertices(whole_cap.edges(u,1),:)-whole_cap.vertices(whole_cap.edges(u,2),:));
 end
 hHex(length(hHex)-length(zero_dist_edges)+1:end) = 0.01;
-%%
-vInit = vertices;
-vInit(:,3) = 0.1*rand(size(vInit,1),1);
-vHex = vInit;
-% for u=1:1000
-    u
-    
-    vHex = SpringRelax_func(vHex, whole_cap.edges, hHex );
-% end
 %%
 
 % get panel (poly shpaes) from outlinea and hexagonal connections
