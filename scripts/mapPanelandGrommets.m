@@ -383,13 +383,13 @@ while (continue_loop)
                 writeVideo(vidfile,F);
                 ind = ind+1;
 %                 save(['deform_correction_results_sDist' filesep 'error_info_' panel_name '_' num2str(loop_count) '.mat'],'vHex2','eHex','hHex','eHexLen','vHex_outline_idx');
-                if 0 %strcmp(panel_name,'top')
+                if 1 %strcmp(panel_name,'top')
                     continue_loop = false;
                 else
-                [ans,hHex_outline_adjust] = repeat_loop(vHex2,eHex,hHex,hHex_outline_adjust,eHexLen,vHex_outline_idx);
-                if ~ans || loop_count > 5
-                    continue_loop = false; 
-                end
+%                 [ans,hHex_outline_adjust] = repeat_loop(vHex2,eHex,hHex,hHex_outline_adjust,eHexLen,vHex_outline_idx);
+%                 if ~ans || loop_count > 5
+%                     continue_loop = false; 
+%                 end
                 loop_count = loop_count+1;
                 end
             end
