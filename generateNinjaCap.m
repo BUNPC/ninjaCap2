@@ -51,7 +51,7 @@ end
 avMainFilepath = which('AtlasViewerGUI.m');
 avAppDir = fileparts(avMainFilepath);
 avDataDir = filesepStandard([avAppDir, '/Data/Colin']);
-%avDataDir = filesepStandard('C:\Users\Sreekanth\Documents\Projects\fNIRS\caps\test_new_head_model_2');
+% avDataDir = filesepStandard('C:\Users\Sreekanth\Documents\Projects\fNIRS\caps\test_new_head_model_3');
 % avDataDir = [avAppDir filesep 'Data' filesep 'Colin'];
 AtlasViewerGUI(pwd, avDataDir, 'userargs');
 
@@ -86,9 +86,9 @@ delete([dirSave filesep 'digpts2mc.txt']);
 system('wrkspace.blend')
 
 
-%% Fix negitive z-coordinates issue with stl file
-% I think this happens in Blender. This is a simple fix here but in the
-% future need to fix in blender.
+%% Fix negitive z-coordinates issue with stl files
+% I believe this issue occurs in Blender. While this is a simple fix for now, 
+%it will require a more permanent solution in Blender in the future.
 
 stl_files = dir(['print' filesep '*.stl']);
 for u = 1:length(stl_files)
@@ -100,7 +100,13 @@ for u = 1:length(stl_files)
     TR = triangulation(f,v);
     stlwrite( TR,[stl_files(u).folder filesep stl_files(u).name],'text');
 end
+%%
+TR1 = stlread('sideLeft_proc.stl');
+v1 = TR1.Points;
 
+
+TR2 = stlread('sideRight_proc.stl');
+v2 = TR2.Points;
 %% COPY BLENDER OUTPUT TO WORKING DIRECTORY
 if ~isdir([dirSave filesep 'print'])
     mkdir([dirSave filesep 'print']);
