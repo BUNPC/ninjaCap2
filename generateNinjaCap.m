@@ -11,7 +11,7 @@
 % ninjaflex.
 function [] = generateNinjaCap(HC, head_model)
 
-if ~exist(head_model,'var')
+if ~exist('head_model','var')
     head_model = 'Colin';
 end
 
