@@ -3,7 +3,7 @@
 % 0. set up and install everything as described in the github HELP file
 % here: https://github.com/neuluce/ninjaCap
 % 1. provide probe file with name "probe.SD" in dir \userinput\probe.SD
-% 2. run generate.m with head circumference(HC) in cm as input argument: e.g. generate(56)
+% 2. run generateNinjaCap.m with head circumference(HC) in cm as input argument: e.g. generateNinjaCap(56)
 % 3. when the files are generated, a blender workspace will be opened. Run
 % the default python script (click <Text> -> <Run Script>, or press Alt+P.
 % 4. your generated and assembled cap is saved in the folder \print\. Here
@@ -46,7 +46,7 @@ if exist([pwd filesep 'atlasViewer.mat'], 'file')
     end
 end
 
-%% PREARE ATLASVIEWER.MAT
+%% PREPARE ATLASVIEWER.MAT
 
 % launch AtlasViewer
 % DEPENDENCY HOMER 3 >> getAppDir()

@@ -44,7 +44,7 @@ paths are example paths that need to be adapted to the directories in your insta
 
 # PREPARING FILES FOR A CAP BUILD
 
-## 1. Create your "probe.SD" using the newest AtlasViewer GUI (ver. May2020 or newer). 
+## 1. Create your "probe.SD" using the newest AtlasViewer GUI. 
 Follow the typical process to generate a probe with the AtlasViewer SDgui. Then, for each source, detector AND dummy optode, select the Grommet Type of that optode. The Grommet Type is an identifier that is used in the cap generation to place the desired element (holder, grommet, …) at the position of the corresponding optode. A brief instruction and list of currently supported grommets/holders, including their IDs, is provided [here](https://github.com/neuluce/ninjaCap/blob/master/docu/grommet_lookup.pdf). Selecting the type “#NONE” will skip the placement of a holder/ an element for this optode. You can assign any Grommet Type identifier to any optode (source, detector, and dummy optodes)!
 
 ![](https://github.com/neuluce/ninjaCap/blob/master/docu/grommetType.png)
@@ -64,7 +64,7 @@ Please make sure you follow the keep out guidelines shown [here](https://github.
     1. (optional, advanced) provide your custom .STL elements to be placed with corresponding grommet IDs. These elements can be grommets, straps, cases, anything. Place them in '.../ninjaCap/stl/elements/<identifier>/'. For this to work, you need to follow the ID-/file-/folder- naming conventions outlined [here](https://github.com/neuluce/ninjaCap/blob/master/docu/grommet_lookup.pdf).
 	
 ## 2. Generate the ninjaCap 
-1. Open matlab, go to AtlasViewer directory and add AtlasViewer directory to matlab path by running the command 'addpath(genpath('.'))' in the matlab command line. 
+1. Open matlab, go to AtlasViewer directory and add AtlasViewer directory to matlab path by running the command 'setpaths' in the matlab command line. 
 
 2. Go to ninjaCap2 directory and add ninjaCap2 directory to matlab path by running the command 'addpath(genpath('.'))' in the matlab command line.
 
