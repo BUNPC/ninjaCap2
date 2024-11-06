@@ -1,16 +1,44 @@
-function panel(atlasViewerFile, circumferenceDesired)
+function panel_AVfile(SD,target_circumference, current_cirucmference)
 
 %% Parameters
-debug = true;
+debug = true; 
 sWidth = 0.375;
-sExtensions = 0;
+sExtensions = 1;
 %% Load head model
 % Use the view state (atlasViewer.mat).
 % fpath = 'D:\Office\Research\Software - Scripts\Matlab\ninjaCap\atlasViewer.mat';
 % load the AtlasViewer state file, including a head model and grommets
-[vHead, fHead, refpts, grommets, springList] = loadAtlasViewer(atlasViewerFile);
+% load('probe.SD');
+% vHead = SD.mesh.vertices;
+% fHead = SD.mesh.faces;
+% refpts = SD.refpts;
+[vHead, fHead, refpts, grommets, springList] = loadAtlasViewer_AVfile(SD);
+% load('HeadandRefpts.mat');
+% if leftRightFlipped(SD)
+% %     temp = vHead(:,1);
+% %     vHead(:,1) = vHead(:,2);
+% %     vHead(:,2) = temp;
+% %     
+% %     temp = refpts.pos(:,1);
+% %     refpts.pos(:,1) = refpts.pos(:,2);
+% %     refpts.pos(:,2) = temp;
+%     
+%     for u = 1:length(grommets)
+%         posHead = grommets(u).posHead;
+%         grommets(u).posHead = [posHead(2) posHead(1) posHead(3)];
+%     end
+% end
 
-%% Get 3D outline points
+%% Scaling to HC size
+scale_factor = target_circumference/current_cirucmference;
+% scale_factor = 1;
+vHead = vHead*scale_factor;
+refpts.pos = refpts.pos*scale_factor;
+for u = 1:length(grommets)
+    grommets(u).posHead = grommets(u).posHead*scale_factor;
+end
+springList(:,3) = springList(:,3)*scale_factor;
+%% Get 3D seam points
 % segmentHead function generates 3D and 2D outline points for left, top and right panels.
 % But we use only 3D outline points since we are going to generate 2D outlines in a different way
 % using spring relaxation method. Also, top3DVertices given by segmentHead
@@ -22,7 +50,13 @@ fname = 'svg/side_piece2.svg';
 pathid = 'side_piece';
 % side panel outline and number of side panel points that define the outside vertices
 [side_piece, sideOutsidePoints] = svgImport(fname, pathid);
-[sideLeftOutline, sideRightOutline, topOutline, sideLeft3DVertices, sideRight3DVertices, top3DVertices] = segmentHead(vHead, fHead, refpts, side_piece);
+% if leftRightFlipped(SD)
+%     [sideRightOutline, sideLeftOutline, topOutline, sideRight3DVertices, sideLeft3DVertices, top3DVertices] = segmentHead(vHead, fHead, refpts, side_piece);
+% else
+    [sideLeftOutline, sideRightOutline, topOutline, sideLeft3DVertices, sideRight3DVertices, top3DVertices] = segmentHead(vHead, fHead, refpts, side_piece);
+% end
+
+ 
 ind = find(isnan(sideLeft3DVertices(:,1)) == 0);
 sideLeft3DVertices = sideLeft3DVertices(ind,:);
 ind = find(isnan(sideRight3DVertices(:,1)) == 0);
@@ -30,68 +64,80 @@ sideRight3DVertices = sideRight3DVertices(ind,:);
 top3DVertices = [flip(sideLeft3DVertices,1); sideRight3DVertices; sideLeft3DVertices(end,:)];
 topOutline_corner_idx = [1;size(sideLeft3DVertices,1);size(sideLeft3DVertices,1)+1;size(sideLeft3DVertices,1)+size(sideRight3DVertices,1)];
 %% Assign grommets to panels
-
-left_cutoff = max(max(sideLeft3DVertices(:,1)));
-right_cutoff = min(sideRight3DVertices(:,1));
+% if leftRightFlipped(SD)
+%     right_cutoff = max(max(sideLeft3DVertices(:,1)));
+%     left_cutoff = min(sideRight3DVertices(:,1));
+% else
+    left_cutoff = max(max(sideLeft3DVertices(:,1)));
+    right_cutoff = min(sideRight3DVertices(:,1));
+% end
 left_idx = [];
 top_idx = [];
 right_idx = [];
-for j = 1:length(grommets)
-    if grommets(j).posHead(1) <= left_cutoff
-        grommets(j).panel = 'sideLeft';
-        left_idx = [left_idx; j];
-    elseif grommets(j).posHead(1) < right_cutoff
-        grommets(j).panel = 'top';
-        top_idx = [top_idx; j];
-    else
-        grommets(j).panel = 'sideRight';
-        right_idx = [right_idx; j];
+% if leftRightFlipped(SD)
+%     for j = 1:length(grommets)
+%         if grommets(j).posHead(1) <= right_cutoff
+%             grommets(j).panel = 'sideRight';
+%             left_idx = [left_idx; j];
+%         elseif grommets(j).posHead(1) < left_cutoff
+%             grommets(j).panel = 'top';
+%             top_idx = [top_idx; j];
+%         else
+%             grommets(j).panel = 'sideLeft';
+%             right_idx = [right_idx; j];
+%         end
+%     end
+% else
+    for j = 1:length(grommets)
+        if grommets(j).posHead(1) <= left_cutoff
+            grommets(j).panel = 'sideLeft';
+            left_idx = [left_idx; j];
+        elseif grommets(j).posHead(1) < right_cutoff
+            grommets(j).panel = 'top';
+            top_idx = [top_idx; j];
+        else
+            grommets(j).panel = 'sideRight';
+            right_idx = [right_idx; j];
+        end
     end
+% end
+%% Delete dummy grommets from grommets and springList
+optType = ~arrayfun(@(x) strcmp(x.type,'#DUMMY'), grommets);
+dummy_optodes = find(optType==0);
+grommets = grommets(optType);
+spring_dummy_idx = springList(:,1) >=min(dummy_optodes) | springList(:,2) >= min(dummy_optodes);
+springList(spring_dummy_idx,:) = [];
+%% get 2D panel seams and grommet positions on 2D panels
+
+% get refPts connected neighbours information
+if leftRightFlipped(SD)
+    [leftSide_refPts_neighbours, rightSide_refPts_neighbours, top_refPts_neighbours] =  get_refpts_neighbours();
+else
+    [rightSide_refPts_neighbours, leftSide_refPts_neighbours, top_refPts_neighbours] =  get_refpts_neighbours();
 end
-%% get 2D panel outlines and grommet positions on 2D panels
+% if leftRightFlipped(SD)
+%     refpts_sideRight_idx = find(refpts.pos(:,1) <= right_cutoff);
+%     refpts_sideLeft_idx = find(refpts.pos(:,1) >= left_cutoff);
+%     refpts_top_idx = find(refpts.pos(:,1) < left_cutoff & refpts.pos(:,1) > right_cutoff);
+% else
+    refpts_sideRight_idx = find(refpts.pos(:,1) >= right_cutoff);
+    refpts_sideRight_idx = compare_to_neighbours(refpts_sideRight_idx,refpts,rightSide_refPts_neighbours);
+    refpts_sideLeft_idx = find(refpts.pos(:,1) <= left_cutoff);
+    refpts_sideLeft_idx = compare_to_neighbours(refpts_sideLeft_idx,refpts,leftSide_refPts_neighbours);
+    refpts_top_idx = find(refpts.pos(:,1) > left_cutoff & refpts.pos(:,1) < right_cutoff);
+    refpts_top_idx = compare_to_neighbours(refpts_top_idx,refpts,top_refPts_neighbours);
+% end
 
-[rightSide_refPts_neighbours, leftSide_refPts_neighbours, top_refPts_neighbours] =  get_refpts_neighbours();
+% right_cutoff = min(sideRight3DVertices(:,1));
 
-right_cutoff = min(sideRight3DVertices(:,1));
-refpts_sideRight_idx = find(refpts.pos(:,1) >= right_cutoff);
-[sideRightOutline, grommets, ~, leftEarSlit] = mapPanelandGrommets(grommets, springList, refpts, refpts_sideRight_idx, sideRight3DVertices, rightSide_refPts_neighbours, 'sideRight');
+[sideRightOutline, grommets, ~, rightEarSlit] = mapPanelandGrommets(grommets, springList, refpts, refpts_sideRight_idx, sideRight3DVertices, rightSide_refPts_neighbours, 'sideRight');
 
-figure;
-plot(sideRightOutline(:,1), sideRightOutline(:,2));
-hold on;
-a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
-if ~isempty(a)
-    scatter(a(:, 1), a(:, 2));
-end
-hold off;
-axis equal
+% left_cutoff = min(sideLeft3DVertices(:,1));
 
-left_cutoff = min(sideLeft3DVertices(:,1));
-refpts_sideLeft_idx = find(refpts.pos(:,1) <= left_cutoff);
 [sideLeftOutline, grommets, ~, leftEarSlit] = mapPanelandGrommets(grommets, springList, refpts, refpts_sideLeft_idx, sideLeft3DVertices, leftSide_refPts_neighbours, 'sideLeft');
 
-figure;
-plot(sideLeftOutline(:,1), sideLeftOutline(:,2));
-hold on;
-a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
-if ~isempty(a)
-    scatter(a(:, 1), a(:, 2));
-end
-hold off;
-axis equal
 
-refpts_top_idx = find(refpts.pos(:,1) > left_cutoff & refpts.pos(:,1) < right_cutoff);
-[topOutline, grommets, topIdx] = mapPanelandGrommets(grommets, springList, refpts, refpts_top_idx, top3DVertices, top_refPts_neighbours, 'top',topOutline_corner_idx);
-
-figure;
-plot(topOutline(:,1), topOutline(:,2));
-hold on;
-a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
-if ~isempty(a)
-    scatter(a(:, 1), a(:, 2));
-end
-hold off;
-axis equal
+[topOutline, grommets, topIdx, Cz_pos] = mapPanelandGrommets(grommets, springList, refpts, refpts_top_idx, top3DVertices, top_refPts_neighbours, 'top',topOutline_corner_idx);
 
 %% Add the side piece to side panels
 
@@ -104,8 +150,6 @@ sideRight_side_piece = transformPointsForward(tform, side_piece);
 sideRight_side_piece = (sideRight_side_piece);
 sideRightIdx = [1;size(sideRightOutline,1)];
 sideRightOutline = [sideRightOutline(:,1:2); sideRight_side_piece];
-% figure;  plot(sideRightOutline(:,1),sideRightOutline(:,2));
-% axis equal
 
 side_piece(:,1) = -1*side_piece(:,1);
 fixedPoints = [sideLeftOutline(1,1:2); sideLeftOutline(end,1:2)];
@@ -116,17 +160,56 @@ sideLeft_side_piece = transformPointsForward(tform, side_piece);
 sideLeft_side_piece = (sideLeft_side_piece);
 sideLeftIdx = [1;size(sideLeftOutline,1)];
 sideLeftOutline = [sideLeftOutline(:,1:2); sideLeft_side_piece];
-% figure;  plot(sideLeftOutline(:,1),sideLeftOutline(:,2));
-% axis equal
 topOutline = topOutline(:,1:2);
 %%
-C = fillCapWithHexagons(sideLeftOutline, sideLeftIdx, sideRightOutline, sideRightIdx, topOutline, topIdx);
-%%
-% outlines_min = [min(topOutline(:,1)) min(topOutline(:,2)); min(sideLeftOutline(:,1)) min(sideLeftOutline(:,2)); min(sideRightOutline(:,1)) min(sideRightOutline(:,2))];
-outlines_min = [0 0; 0 0; 0 0];
-[sideLeftPanel, sideRightPanel, topPanel] = getPanels(C, sWidth, outlines_min);
+% plot 2D panels with grommets positions
+figure;
+plot(sideRightOutline(:,1), sideRightOutline(:,2));
+hold on;
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
+if ~isempty(a)
+    scatter(a(:, 1), a(:, 2));
+end
+hold off;
+axis equal
 
+figure;
+plot(sideLeftOutline(:,1), sideLeftOutline(:,2));
+hold on;
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
+if ~isempty(a)
+    scatter(a(:, 1), a(:, 2));
+end
+hold off;
+axis equal
+
+figure;
+plot(topOutline(:,1), topOutline(:,2));
+hold on;
+a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
+if ~isempty(a)
+    scatter(a(:, 1), a(:, 2));
+end
+hold off;
+axis equal
 %%
+% fill cap with hexagons
+C = fillCapWithHexagons(sideLeftOutline, sideLeftIdx, sideRightOutline, sideRightIdx, topOutline, topIdx);
+
+% get panel (poly shpaes) from outlinea and hexagonal connections
+[sideLeftPanel, sideRightPanel, topPanel] = getPanels(C, sWidth);
+
+%% add marker grommet automatically. It is decided that it is best to add marker grommet while designing probe instead of adding automatically.
+% nGrommets = length(grommets);
+% grommets(nGrommets+1).type = '#PMRK1';
+% grommets(nGrommets+1).rot = 0;
+% grommets(nGrommets+1).panel = 'top';
+% grommets(nGrommets+1).posPanel= Cz_pos(1:2);
+% grommets(nGrommets+1).flags = {};
+% grommets(nGrommets+1).optType = 3;
+%%
+% move grommet positions as panels position is moved in filling cap with
+% hexagons
 outlines_min = [min(topOutline(:,1)) min(topOutline(:,2)); min(sideLeftOutline(:,1)) min(sideLeftOutline(:,2)); min(sideRightOutline(:,1)) min(sideRightOutline(:,2))];
 for u = 1:length(grommets)
     if strcmp(grommets(u).panel,'sideRight')
@@ -139,34 +222,6 @@ for u = 1:length(grommets)
         grommets(u).posPanel = grommets(u).posPanel-[outlines_min(1,1) outlines_min(1,2)];
     end
 end
-%%
-% figure; plot(sideLeftPanel);
-% hold on;
-% a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideLeft') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
-% if ~isempty(a)
-%     scatter(a(:, 1), a(:, 2));
-% end
-% hold off;
-% axis equal
-% 
-% figure; plot(sideRightPanel);
-% hold on;
-% a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'sideRight') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
-% if ~isempty(a)
-%     scatter(a(:, 1), a(:, 2));
-% end
-% hold off;
-% axis equal
-% 
-% figure; plot(topPanel);
-% hold on;
-% a = cat(1, grommets(arrayfun(@(x) strcmp(x.panel, 'top') && ~strcmp(x.type, '#NONE'), grommets)).posPanel);
-% if ~isempty(a)
-%     scatter(a(:, 1), a(:, 2));
-% end
-% hold off;
-% axis equal
-
 
 %% Add extensions if needed
 if sExtensions == 1
@@ -185,10 +240,6 @@ if sExtensions == 1
                ext_lattice_top = [ext_lattice_top; [C(2).eExtensionsTop(u).pts(iL) C(2).eExtensionsTop(u).pts(iL+1)];...
                        [C(2).eExtensionsTop(u).pts(iL+2) C(2).eExtensionsTop(u).pts(iL+3)]; [NaN NaN]];
            end
-%            temp_poly = polybuffer(temp_lattice_left, 'lines', 1, 'JointType', 'square');
-%            sideLeftPanel = union(sideLeftPanel,temp_poly);
-%            temp_poly = polybuffer(temp_lattice_top, 'lines', 1, 'JointType', 'square');
-%            topPanel = union(topPanel,temp_poly);
        end
    end
    
@@ -271,48 +322,76 @@ top_overlap_poly = polybuffer(top_overlap_lattice, 'lines', 1, 'JointType', 'squ
 topPanel  = union(topPanel,top_overlap_poly);
 
 %% 
+
+% add outlines (side_piece) to polygons also extend top outline by 5mm to
+% overlap with side outlines
 sideLeftOutline_poly = polybuffer(sideLeftOutline(sideLeftIdx(2)+1:end,:)-min(sideLeftOutline,[],1), 'lines', 1, 'JointType', 'square');
-figure; plot(sideLeftOutline_poly);
-
 sideRightOutline_poly = polybuffer(sideRightOutline(sideRightIdx(2)+1:end,:)-min(sideRightOutline,[],1), 'lines', 1, 'JointType', 'square');
-figure; plot(sideRightOutline_poly);
+topOutline_side1 = topOutline(topIdx(2):topIdx(3),:);
+topOutline_side2 = [topOutline(topIdx(4):end,:); topOutline(1,:)];
 
-topOutline_lattice = [topOutline(topIdx(2):topIdx(3),1:2); [NaN NaN]; topOutline(topIdx(4):end,:); topOutline(1,:)];
+temp_OL = sideLeftOutline(sideLeftIdx(2)-1:sideLeftIdx(2),:);
+theta = asin( (temp_OL(2,1)- temp_OL(1,1)) / norm(temp_OL(2,:)-temp_OL(1,:)));
+R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+side1_ext1 = (R * (sideLeftOutline(sideLeftIdx(2)+2,:)-sideLeftOutline(sideLeftIdx(2)+1,:))' + topOutline_side1(1,:)')';
+
+temp_OL = sideRightOutline(sideRightIdx(2)-1:sideRightIdx(2),:);
+theta = asin( (temp_OL(2,1)- temp_OL(1,1)) / norm(temp_OL(2,:)-temp_OL(1,:)));
+R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+side1_ext2 = (R * (sideRightOutline(sideRightIdx(2)+2,:)-sideRightOutline(sideRightIdx(2)+1,:))' + topOutline_side1(end,:)')';
+
+temp_OL = sideLeftOutline(1:2,:);
+theta = asin( (temp_OL(2,1)- temp_OL(1,1)) / norm(temp_OL(2,:)-temp_OL(1,:)));
+R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+side2_ext2 = (R * (sideLeftOutline(end-1,:)-sideLeftOutline(end,:))' + topOutline_side2(end,:)')';
+
+temp_OL = sideRightOutline(1:2,:);
+theta = asin( (temp_OL(2,1)- temp_OL(1,1)) / norm(temp_OL(2,:)-temp_OL(1,:)));
+R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+side2_ext1 = (R * (sideRightOutline(end-1,:)-sideRightOutline(end,:))' + topOutline_side2(1,:)')';
+
+topOutline_side1 = [side1_ext1; topOutline_side1; side1_ext2];
+topOutline_side2 = [side2_ext1; topOutline_side2; side2_ext2];
+topOutline_lattice = [topOutline_side1; [NaN NaN]; topOutline_side2];
 topOutline_poly =  polybuffer(topOutline_lattice-min(topOutline,[],1), 'lines', 1, 'JointType', 'square');
-figure; plot(topOutline_poly );
 
 %%
+
+% Make data format as previous ninjaCap so that from here on we can use
+% prevoius ninjacap code
 sideLeftPanel(3) = sideLeftPanel;
 sideLeftPanel(1) = sideLeftOutline_poly;
 sideLeftPanel(4) = sideLeftPanel(2);
 sideLeftPanel(5) = sideLeftPanel(2);
-figure; plot(sideLeftPanel)
-%%
+
 sideRightPanel(3) = sideRightPanel;
 sideRightPanel(1) = sideRightOutline_poly;
 sideRightPanel(4) = sideRightPanel(2);
 sideRightPanel(5) = sideRightPanel(2);
-figure; plot(sideRightPanel)
 
 topPanel(3) = topPanel;
 topPanel(1) = topOutline_poly;
 topPanel(4) = topPanel(2);
 topPanel(5) = topPanel(2);
-figure; plot(topPanel)
 
-%%
 
 %% Cut panels if needed
 
 % SETTINGS
 max_size = [270 270]; % mm
+buffer = 0; % mm in overlap along boundaries
+
+topPanel_temp = cut(topPanel, max_size, buffer);
+sideLeftPanel_temp = cut(sideLeftPanel, max_size, buffer);
+sideRightPanel_temp = cut(sideRightPanel, max_size, buffer);
+
+grommets = cutGrommets(grommets, topPanel_temp, sideLeftPanel_temp, sideRightPanel_temp);
+
 buffer = 5; % mm in overlap along boundaries
 
 topPanel = cut(topPanel, max_size, buffer);
 sideLeftPanel = cut(sideLeftPanel, max_size, buffer);
 sideRightPanel = cut(sideRightPanel, max_size, buffer);
-
-grommets = cutGrommets(grommets, topPanel, sideLeftPanel, sideRightPanel);
 
 
 %% Debug grommets
@@ -353,8 +432,9 @@ end
 
 %save folder
 stlfpath = 'stl/cap/';
-mkdir stl cap
-
+if ~isfolder('stl/cap')
+    mkdir stl cap
+end
 
 % make height vector
 names = {'outline-out' 'outline-stitch' 'lattice' 'stitch-nub' 'grommet'};
@@ -425,7 +505,12 @@ for i = 1:size(sideRightPanel, 1) % for each right side piece
     end
 end
 
-
+%% If rotation values are string convert them to int. But this shouldn't happen, fix it in SDGui.
+for u = 1:length(grommets)
+    if ischar(grommets(u).rot)
+        grommets(u).rot = str2num(grommets(u).rot);
+    end
+end
 
 %% Save positions of grommets and other elements in STLs for python script
 IDXchStrapPoints = [10 11];
@@ -440,10 +525,35 @@ shifted_sideLeftOutline = sideLeftOutline-min(sideLeftOutline,[],1);
 shifted_sideRightOutline = sideRightOutline-min(sideRightOutline,[],1);
 shifted_topOutline = topOutline-min(topOutline,[],1);
 [STLcoords] = getStlCoordinates(grommets, holders, aux, shifted_sideLeftOutline, shifted_sideRightOutline, sideLeftPanel, shifted_topOutline, sideOutsidePoints, IDXchStrapPoints);
+% add ear slit pos
+% STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) -[10 10];
+% STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) -[-10 10];
+% STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) +[15 -25];
+% STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) +[-15 -25];
+STLcoords.sideLeftEar = leftEarSlit(1:2) - min(sideLeftOutline,[],1) +[15 0];
+STLcoords.sideRightEar = rightEarSlit(1:2) - min(sideRightOutline,[],1) +[-15 0];
 
+
+
+%%
+
+% add marker optode at Cz position
+% STLcoords.
 save('stl\cap\RefPts', '-struct', 'STLcoords')
 
 %% RUN SD SEPARATION VALIDATION
-sdseps= sdsepValid(grommets);
+% sdseps= sdsepValid(grommets);
 
+end
+
+function  refpts_sideRight_idx = compare_to_neighbours(refpts_sideRight_idx,refpts,rightSide_refPts_neighbours)
+    idx_to_remove = [];
+    for u = 1:length(refpts_sideRight_idx)
+        label = refpts.labels{refpts_sideRight_idx(u)};
+        Lia = ismember(rightSide_refPts_neighbours,label);
+        if sum(Lia(:)) == 0
+            idx_to_remove = [idx_to_remove; u];
+        end
+    end
+    refpts_sideRight_idx(idx_to_remove) = [];
 end
