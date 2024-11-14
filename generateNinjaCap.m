@@ -9,7 +9,11 @@
 % 4. your generated and assembled cap is saved in the folder \print\. Here
 % you also find a default 3D printing profile for Cura LULZBOT TAZ 6 using
 % ninjaflex.
-function [] = generateNinjaCap(HC)
+function [] = generateNinjaCap(HC, head_model)
+
+if ~exist('head_model','var')
+    head_model = 'Colin';
+end
 
 dirSave = pwd;
 rootDir = fileparts(which(mfilename));
@@ -50,8 +54,14 @@ end
 % appdir hardcoded
 avMainFilepath = which('AtlasViewerGUI.m');
 avAppDir = fileparts(avMainFilepath);
-avDataDir = filesepStandard([avAppDir, '/Data/Colin']);
-% avDataDir = [avAppDir filesep 'Data' filesep 'Colin'];
+if strcmp(head_model,'Colin')
+    avDataDir = filesepStandard([avAppDir, '/Data/Colin']);
+elseif strcmp(head_model,'ICBM')
+    avDataDir = filesepStandard([rootDir, '/Data/ICBM']);
+else
+    disp('Specified head model does not exist')
+    return
+end
 AtlasViewerGUI(pwd, avDataDir, 'userargs');
 
 % scale head to corrected circumference
