@@ -19,7 +19,11 @@ for u = 1:length(leftSideIdx)
     grommet_type = grommets(leftSideIdx(u)).type;
     if ~strcmp(grommet_type,'#DUMMY')
         idx = find(ismember(grommetDimensions(:,1),grommet_type)==1);
-        grommet_max_size = max(grommetDimensions{idx,2:3})/2;
+        if ~isempty(idx)
+            grommet_max_size = max(grommetDimensions{idx,2:3})/2; 
+        else
+            grommet_max_size = 10;
+        end
         dist = sqrt(sum((C(2).eSeamExt(:,1:2)-pt).^2,2));
         includeLeftExtension(dist<=grommet_max_size) = 1;
         dist = sqrt(sum((C(2).eSeamExt(:,3:4)-pt).^2,2));
@@ -33,7 +37,11 @@ for u = 1:length(rightSideIdx)
     grommet_type = grommets(rightSideIdx(u)).type;
     if ~strcmp(grommet_type,'#DUMMY')
         idx = find(ismember(grommetDimensions(:,1),grommet_type)==1);
-        grommet_max_size = max(grommetDimensions{idx,2:3})/2;
+        if ~isempty(idx)
+            grommet_max_size = max(grommetDimensions{idx,2:3})/2;
+        else
+            grommet_max_size = 10;
+        end
         dist = sqrt(sum((C(3).eSeamExt(:,1:2)-pt).^2,2));
         includeRightExtension(dist<=grommet_max_size) = 1;
         dist = sqrt(sum((C(3).eSeamExt(:,3:4)-pt).^2,2));
@@ -48,7 +56,11 @@ for u = 1:length(topIdx)
     grommet_type = grommets(topIdx(u)).type;
     if ~strcmp(grommet_type,'#DUMMY')
         idx = find(ismember(grommetDimensions(:,1),grommet_type)==1);
-        grommet_max_size = max(grommetDimensions{idx,2:3})/2;
+        if ~isempty(idx)
+            grommet_max_size = max(grommetDimensions{idx,2:3})/2;
+        else
+            grommet_max_size = 10;
+        end
         dist = sqrt(sum((C(2).eSeamExtRot(:,1:2)-pt).^2,2));
         includeTopLeftExtension(dist<=grommet_max_size) = 1;
         dist = sqrt(sum((C(3).eSeamExtRot(:,1:2)-pt).^2,2));
