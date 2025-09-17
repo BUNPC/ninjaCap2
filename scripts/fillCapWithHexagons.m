@@ -87,15 +87,87 @@ end
 
 
 %%
+[~, sources_left_side, ~, sources_right_side, det_centroids_left, src_centroids_left, det_centroids_right, src_centroids_right, outer_sources_left_side, outer_sources_right_side] = ...
+    get_UHD_optode_pos(sideLeftOutline(sideLeftIdx(1):sideLeftIdx(2),:), ...
+                       sideRightOutline(sideRightIdx(1):sideRightIdx(2),:), ...
+                       topOutline);
+                   
+% Generate connection lists
+connections_left_det = find_connections(det_centroids_left, outer_sources_left_side, 3, 15);
+connections_left_src = find_connections(src_centroids_left, outer_sources_left_side, 3, 15);
+all_connections_left = [connections_left_det; connections_left_src];
+
+connections_right_det = find_connections(det_centroids_right, outer_sources_right_side, 3, 15);
+connections_right_src = find_connections(src_centroids_right, outer_sources_right_side, 3, 15);
+all_connections_right = [connections_right_det; connections_right_src];
+
+% Normalize connection coordinates
+min_left = min(sideLeftOutline(:,:), [], 1);
+all_connections_left(~any(isnan(all_connections_left),2),:) = all_connections_left(~any(isnan(all_connections_left),2),:) - min_left;
+
+min_right = min(sideRightOutline(:,:), [], 1);
+all_connections_right(~any(isnan(all_connections_right),2),:) = all_connections_right(~any(isnan(all_connections_right),2),:) - min_right;
+
+% Convert to V/E format
+[o(2).v_conn, o(2).e_conn] = connectionsToVE(all_connections_left);
+[o(3).v_conn, o(3).e_conn] = connectionsToVE(all_connections_right);
+% det_centroids_left = det_centroids_left-min_left;
+% src_centroids_left = src_centroids_left-min_left;
+
+%%
 % fill mask with hexagons
 % figure(1)
+punch_radius = 5; 
+outlines_min = [min(topOutline(:,1)) min(topOutline(:,2)); min(sideLeftOutline(:,1)) min(sideLeftOutline(:,2)); min(sideRightOutline(:,1)) min(sideRightOutline(:,2))];
 
 for iO = 1:nOutlines
 
-%     subplot(1,nOutlines,iO)
-    [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = fillCapWithHexagons_func( o(iO).v, hEdge, o(iO).Imask );
+%     subplot(1,nOutlines,
+    if iO == 1
+        [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = fillCapWithHexagons_func( o(iO).v, hEdge, o(iO).Imask );
+    elseif iO == 2
+% %         [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = fillCapWithHexagonsAndProbeStruture_func( o(iO).v, hEdge, o(iO).Imask );
+%         [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = createMesh_punchAndReplace(o(iO).Imask, hEdge, o(2).v_conn, o(2).e_conn, punch_radius);
+% %         [o(iO).vOut, o(iO).eOut] = trimMeshToPolygon(o(iO).vOut, o(iO).eOut, sideLeftOutline-outlines_min(2,:));
+%         [o(iO).vOut, o(iO).eOut] = cleanBoundaryData(o(iO).vOut, o(iO).eOut);
+        
+        [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = createMesh_punchAndReplace(o(iO).Imask, hEdge, o(iO).v_conn, o(iO).e_conn, punch_radius);
+        [o(iO).vOut, o(iO).eOut] = trimMeshToPolygon(o(iO).vOut, o(iO).eOut, sideLeftOutline-outlines_min(2,:));
+        [o(iO).vOut, o(iO).eOut] = cleanBoundaryData(o(iO).vOut, o(iO).eOut);
+        o(iO).eOut = orientBoundaryEdges(o(iO).vOut, o(iO).eOut, sideLeftOutline-outlines_min(2,:));
+    else
+        [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = createMesh_punchAndReplace(o(iO).Imask, hEdge, o(iO).v_conn, o(iO).e_conn, punch_radius);
+        [o(iO).vOut, o(iO).eOut] = trimMeshToPolygon(o(iO).vOut, o(iO).eOut, sideRightOutline-outlines_min(3,:));
+        [o(iO).vOut, o(iO).eOut] = cleanBoundaryData(o(iO).vOut, o(iO).eOut);
+         o(iO).eOut = orientBoundaryEdges(o(iO).vOut, o(iO).eOut, sideRightOutline-outlines_min(3,:));
+         [o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut] = reclassifyInternalBoundaryEdges(o(iO).v, o(iO).e, o(iO).vOut, o(iO).eOut, sideRightOutline-outlines_min(3,:));
+        
+    end
+
 
 end
+
+%%
+figure; plot(sideLeftOutline(:,1)-outlines_min(2,1), sideLeftOutline(:,2)-outlines_min(2,2)); axis image
+% figure; plot(sideRightOutline(:,1)-outlines_min(3,1), sideRightOutline(:,2)-outlines_min(3,2)); axis image
+
+hold on; plot(o(2).v(:,1), o(2).v(:,2), 'b.');
+
+
+for u=1:size(o(2).e,1)
+    plot([o(2).v(o(2).e(u,1),1) o(2).v(o(2).e(u,2),1)], [o(2).v(o(2).e(u,1),2) o(2).v(o(2).e(u,2),2)],'r');
+end
+
+%%
+hold on; plot(o(2).vOut(:,1), o(2).vOut(:,2), 'b.');
+
+
+for u=1:size(o(2).eOut,1)
+    plot([o(2).vOut(o(2).eOut(u,1),1) o(2).vOut(o(2).eOut(u,2),1)], [o(2).vOut(o(2).eOut(u,1),2) o(2).vOut(o(2).eOut(u,2),2)],'b');
+end
+
+
+%%
 
 % save temp.mat o
 
@@ -114,6 +186,7 @@ for iO = 1:length(o)
         iE
         xy2 = [o(iO).vOut(o(iO).eOut(iE,1),:) o(iO).vOut(o(iO).eOut(iE,2),:)];
         out = lineSegmentIntersect(xy1, xy2);
+
         idx = find(out.intAdjacencyMatrix==1);
         if o(iO).seamIs(idx)==0
             o(iO).v(end+1,:) = o(iO).vOut(o(iO).eOut(iE,1),:);
@@ -131,6 +204,7 @@ for iO = 2:3
     vOut = o(iO).vOut;
     e = o(iO).e;
     eOut = o(iO).eOut;
+
     
     xx = o(iO).xoutline;
     yy = o(iO).youtline;
@@ -148,11 +222,13 @@ for iO = 2:3
     for iE = 1:size(eOut,1)
         iE
         idx = []; foo=0;
+        count = 1;
         while isempty(idx) % this was thrown in to deal with an outward edge that didn't cross the outline. This happens because of the discrete mask I use prior to this
             xy2 = [vOut(eOut(iE,1),:)+foo*(vOut(eOut(iE,1),:)-vOut(eOut(iE,2),:)) vOut(eOut(iE,2),:)+foo*(vOut(eOut(iE,2),:)-vOut(eOut(iE,1),:))];
             foo = foo + 0.1;
             out = lineSegmentIntersect(xy1, xy2);
             idx = find(out.intAdjacencyMatrix==1);
+            count = count+1;     
         end
         idx = idx(1)
         eSeamXidx(iE) = idx;

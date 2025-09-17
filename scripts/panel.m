@@ -137,6 +137,58 @@ axis equal
 %%
 % fill cap with hexagons
 C = fillCapWithHexagons(sideLeftOutline, sideLeftIdx, sideRightOutline, sideRightIdx, topOutline, topIdx);
+% save('outlines.mat','sideLeftOutline', 'sideLeftIdx', 'sideRightOutline', 'sideRightIdx', 'topOutline', 'topIdx');
+%%
+O = C;
+outlines_min = [min(topOutline(:,1)) min(topOutline(:,2)); min(sideLeftOutline(:,1)) min(sideLeftOutline(:,2)); min(sideRightOutline(:,1)) min(sideRightOutline(:,2))];
+iO = 3;
+if iO == 2
+    figure; plot(sideLeftOutline(:,1)-outlines_min(2,1), sideLeftOutline(:,2)-outlines_min(2,2)); axis image
+else
+    figure; plot(sideRightOutline(:,1)-outlines_min(3,1), sideRightOutline(:,2)-outlines_min(3,2)); axis image
+end
+hold on; plot(O(iO).v(:,1), O(iO).v(:,2), 'b.');
+
+
+for u=1:size(O(iO).e,1)
+    plot([O(iO).v(O(iO).e(u,1),1) O(iO).v(O(iO).e(u,2),1)], [O(iO).v(O(iO).e(u,1),2) O(iO).v(O(iO).e(u,2),2)],'r');
+end
+
+%%
+plot(O(iO).vOut(:,1), O(iO).vOut(:,2), 'b.');
+
+
+for u=1:size(O(iO).eOut,1)
+    plot([O(iO).vOut(O(iO).eOut(u,1),1) O(iO).vOut(O(iO).eOut(u,2),1)], [O(iO).vOut(O(iO).eOut(u,1),2) O(iO).vOut(O(iO).eOut(u,2),2)],'b');
+end
+hold off
+
+%%
+iO = 1;
+ figure; plot(topOutline(:,1)-outlines_min(1,1), topOutline(:,2)-outlines_min(1,2)); axis image
+ hold on
+for u=1:size(O(iO).e,1)
+    plot([O(iO).v(O(iO).e(u,1),1) O(iO).v(O(iO).e(u,2),1)], [O(iO).v(O(iO).e(u,1),2) O(iO).v(O(iO).e(u,2),2)],'r');
+end
+
+plot(O(iO).vOut(:,1), O(iO).vOut(:,2), 'b.');
+
+
+for u=1:size(O(iO).eOut,1)
+    plot([O(iO).vOut(O(iO).eOut(u,1),1) O(iO).vOut(O(iO).eOut(u,2),1)], [O(iO).vOut(O(iO).eOut(u,1),2) O(iO).vOut(O(iO).eOut(u,2),2)],'b');
+end
+hold off
+%%
+figure; plot(sideLeftOutline(:,1)-outlines_min(2,1), sideLeftOutline(:,2)-outlines_min(2,2)); axis image
+hold on; plot(C(2).v(:,1), C(2).v(:,2), 'b.');
+for u=1:size(C(2).e,1)
+    plot([C(2).v(C(2).e(u,1),1) C(2).v(C(2).e(u,2),1)], [C(2).v(C(2).e(u,1),2) C(2).v(C(2).e(u,2),2)],'r');
+end
+plot(C(2).vOut(:,1), C(2).vOut(:,2), 'b.');
+for u=1:size(C(2).eOut,1)
+    plot([C(2).vOut(C(2).eOut(u,1),1) C(2).vOut(C(2).eOut(u,2),1)], [C(2).vOut(C(2).eOut(u,1),2) C(2).vOut(C(2).eOut(u,2),2)],'b');
+end
+hold off
 
 %%
 %make graph for hexagonal structure and grommets
@@ -520,6 +572,7 @@ ymax = ymax+5;
 % % add seam to top peices
 % [topPanel_left, topPanel_right] = add_seams_toppanel(topPanel_left, topPanel_right,topPanel_midpoint_x);
 % topPanel = [topPanel_left; topPanel_right];
+
 %% Debug grommets
 
 if debug
